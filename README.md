@@ -10,6 +10,9 @@ Calendario de productividad INVEX con tema Halloween. Aplicación estática para
 4. Filtra fechas, cadena, región y tienda. Cambia la vista a general, cadena, región o tienda.
 5. **Editar metas** cambia la meta por cadena o añade una excepción por tienda. Un cero es válido; ambos campos vacíos eliminan la excepción. Las ediciones aplican a todo el periodo mostrado.
 6. **Imagen general** exporta el total de la selección. **Imagen** en cada tabla exporta ese calendario individual. Los PNG respetan fechas y filtros.
+7. **Solo semanas cerradas** muestra únicamente semanas completas de lunes a domingo dentro del rango elegido, anteriores al día actual en Ciudad de México. **Semana específica** permite ver una sola semana. El resumen y las imágenes usan exactamente esos días.
+8. Los filtros de cadena, región y tienda están vinculados. Elegir una tienda selecciona su cadena y región; cambiar la cadena o región elimina una tienda incompatible.
+9. Las tablas e imágenes de una sola cadena incorporan su logo: SAMS en azul; Walmart en azul y amarillo. Las selecciones mixtas conservan la identidad de META PISO. Los logos se obtuvieron de los sitios oficiales [Walmart México](https://www.walmart.com.mx/) y [Sam’s Club México](https://www.sams.com.mx/) y se incluyen localmente para exportación sin CORS.
 
 ## Reglas
 
