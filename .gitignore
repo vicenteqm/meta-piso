@@ -1,0 +1,6 @@
+.private/
+node_modules/
+tests/*.png
+__pycache__/
+*.xlsx
+*.csv
