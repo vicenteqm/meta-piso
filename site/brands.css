@@ -20,3 +20,8 @@
 .theme-WM .totals b{color:#102c51}
 .exporting.theme-WM{background:#fff5cc!important}
 @media(max-width:800px){.theme-WM .report-heading{margin:-14px -14px 18px;padding:14px}}
+.theme-WM .day-metrics td.percent-positive,.theme-SAMS .day-metrics td.percent-positive,.theme-WM .totals b.percent-positive,.theme-SAMS .totals b.percent-positive{color:#137333}
+.theme-WM .day-metrics td.percent-negative,.theme-SAMS .day-metrics td.percent-negative,.theme-WM .totals b.percent-negative,.theme-SAMS .totals b.percent-negative{color:#bd1e28}
+.theme-WM .day-metrics td.percent-neutral,.theme-SAMS .day-metrics td.percent-neutral,.theme-WM .totals b.percent-neutral,.theme-SAMS .totals b.percent-neutral{color:#102c51}
+.kpi:nth-child(3) strong.percent-positive{color:#72e6a2}
+.kpi:nth-child(3) strong.percent-negative{color:#ff858b}
