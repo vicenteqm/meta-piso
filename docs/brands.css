@@ -1,6 +1,6 @@
 
 /* ==========================================
-   META PISO - ESTILOS WALMART Y SAM'S CLUB
+   META PISO - WALMART Y SAM'S CLUB
    ========================================== */
 
 .report-brand {
@@ -10,27 +10,18 @@
     min-width: 0;
 }
 
-/* LOGOTIPOS MÁS GRANDES */
-
 .chain-logo {
-    width: 280px;
+    width: 400px;
+    max-width: 100%;
     height: auto;
     object-fit: contain;
     flex: none;
     background: #fff;
     border-radius: 8px;
-    padding: 12px;
+    padding: 8px;
 }
 
-/* LOGOTIPOS EN PANTALLAS PEQUEÑAS */
-
-@media (max-width: 800px) {
-    .chain-logo {
-        width: 180px;
-        height: auto;
-        padding: 8px;
-    }
-}
+/* TEMAS */
 
 .theme-WM,
 .theme-SAMS {
@@ -58,7 +49,7 @@
     border-top-color: #0067a0;
 }
 
-/* ENCABEZADOS DEL CALENDARIO */
+/* ENCABEZADOS */
 
 .theme-WM .calendar > thead th,
 .theme-SAMS .calendar > thead th {
@@ -77,7 +68,7 @@
     border-radius: 6px;
 }
 
-/* CELDAS DEL CALENDARIO */
+/* CELDAS */
 
 .theme-WM .calendar > tbody > tr > td,
 .theme-SAMS .calendar > tbody > tr > td {
@@ -257,12 +248,10 @@
 }
 
 /* ==========================================
-   COLORES DE PORCENTAJES
-   WALMART: MAYOR A 30% VERDE
-   SAM'S: MAYOR A 60% VERDE
+   COLORES DE CUMPLIMIENTO
+   WM > 30% VERDE
+   SAMS > 60% VERDE
    ========================================== */
-
-/* VERDE - CUMPLIMIENTO SUPERIOR AL LÍMITE */
 
 .theme-WM .day-metrics td.percent-positive,
 .theme-SAMS .day-metrics td.percent-positive,
@@ -271,16 +260,12 @@
     color: #137333 !important;
 }
 
-/* ROJO - CUMPLIMIENTO INFERIOR AL LÍMITE */
-
 .theme-WM .day-metrics td.percent-negative,
 .theme-SAMS .day-metrics td.percent-negative,
 .theme-WM .totals b.percent-negative,
 .theme-SAMS .totals b.percent-negative {
     color: #bd1e28 !important;
 }
-
-/* AZUL - CUMPLIMIENTO IGUAL AL LÍMITE */
 
 .theme-WM .day-metrics td.percent-neutral,
 .theme-SAMS .day-metrics td.percent-neutral,
@@ -289,7 +274,7 @@
     color: #102c51 !important;
 }
 
-/* KPI DE CUMPLIMIENTO */
+/* KPI */
 
 .kpi:nth-child(3) strong.percent-positive {
     color: #72e6a2;
@@ -297,6 +282,152 @@
 
 .kpi:nth-child(3) strong.percent-negative {
     color: #ff858b;
+}
+
+/* ==========================================
+   LOGOTIPOS EXTRA GRANDES
+   ========================================== */
+
+.report.theme-WM .chain-logo,
+.report.theme-SAMS .chain-logo {
+    width: 400px !important;
+    max-width: 100%;
+    height: auto !important;
+    object-fit: contain;
+    padding: 8px;
+    flex-shrink: 0;
+}
+
+.report.theme-WM .report-brand,
+.report.theme-SAMS .report-brand {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+/* ==========================================
+   NUEVO INDICADOR
+   TIENDAS QUE LOGRARON META
+   ========================================== */
+
+.tiendas-meta {
+    margin-top: 8px;
+    padding: 7px 9px;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 8px;
+    background: #edf4fc;
+    border: 1px solid #c5d8ee;
+}
+
+.tiendas-meta-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+}
+
+.tiendas-meta-label {
+    font-size: 10px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: #355578;
+}
+
+.tiendas-meta-numero {
+    font-size: 17px;
+    line-height: 1;
+    font-weight: 800;
+    color: #102c51;
+    white-space: nowrap;
+}
+
+.tiendas-meta-numero small {
+    font-size: 10px;
+    font-weight: 600;
+    color: #64788e;
+}
+
+/* BARRA DE TIENDAS */
+
+.tiendas-meta-barra {
+    height: 4px;
+    margin-top: 6px;
+    background: #d3deea;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.tiendas-meta-barra span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #1766b7;
+}
+
+/* TODAS LOGRARON META */
+
+.tiendas-meta.completo {
+    background: #e4f5e9;
+    border-color: #9bd5ad;
+}
+
+.tiendas-meta.completo .tiendas-meta-numero {
+    color: #137333;
+}
+
+.tiendas-meta.completo .tiendas-meta-barra span {
+    background: #137333;
+}
+
+/* ALGUNAS LOGRARON META */
+
+.tiendas-meta.parcial {
+    background: #edf4fc;
+    border-color: #b9d1ef;
+}
+
+.tiendas-meta.parcial .tiendas-meta-numero {
+    color: #1766b7;
+}
+
+.tiendas-meta.parcial .tiendas-meta-barra span {
+    background: #1766b7;
+}
+
+/* NINGUNA LOGRÓ META */
+
+.tiendas-meta.sin-meta {
+    background: #fff0f0;
+    border-color: #edc0c0;
+}
+
+.tiendas-meta.sin-meta .tiendas-meta-numero {
+    color: #bd1e28;
+}
+
+.tiendas-meta.sin-meta .tiendas-meta-barra span {
+    background: #bd1e28;
+}
+
+/* ESTILO WALMART */
+
+.report.theme-WM .tiendas-meta {
+    border-radius: 7px;
+}
+
+.report.theme-WM .tiendas-meta-label {
+    color: #254367;
+}
+
+/* ESTILO SAM'S CLUB */
+
+.report.theme-SAMS .tiendas-meta {
+    border-radius: 7px;
+}
+
+.report.theme-SAMS .tiendas-meta-label {
+    color: #155b88;
 }
 
 /* ==========================================
@@ -309,9 +440,9 @@
     }
 
     .chain-logo {
-        width: 100px;
+        width: 240px;
         height: auto;
-        padding: 6px;
+        padding: 8px;
     }
 
     .report-heading {
@@ -335,36 +466,7 @@
         margin: -14px -14px 18px;
         padding: 14px;
     }
-}
 
-
-/* ========================================
-   LOGOTIPOS EXTRA GRANDES
-   WALMART Y SAM'S CLUB
-   ======================================== */
-
-.report.theme-WM .chain-logo,
-.report.theme-SAMS .chain-logo {
-    width: 400px !important;
-    max-width: 100%;
-    height: auto !important;
-    object-fit: contain;
-    padding: 8px;
-    flex-shrink: 0;
-}
-
-/* AJUSTAR EL ENCABEZADO */
-
-.report.theme-WM .report-brand,
-.report.theme-SAMS .report-brand {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-}
-
-/* PANTALLAS PEQUEÑAS */
-
-@media (max-width: 800px) {
     .report.theme-WM .chain-logo,
     .report.theme-SAMS .chain-logo {
         width: 240px !important;
@@ -376,5 +478,21 @@
     .report.theme-SAMS .report-brand {
         flex-wrap: wrap;
     }
-}
 
+    .tiendas-meta {
+        padding: 5px 6px;
+        margin-top: 6px;
+    }
+
+    .tiendas-meta-label {
+        font-size: 9px;
+    }
+
+    .tiendas-meta-numero {
+        font-size: 14px;
+    }
+
+    .tiendas-meta-numero small {
+        font-size: 9px;
+    }
+}
