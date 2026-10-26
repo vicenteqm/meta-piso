@@ -1,27 +1,326 @@
-.report-brand{display:flex;align-items:center;gap:22px;min-width:0}.chain-logo{width:160px;height:65px;object-fit:contain;flex:none;background:#fff;border-radius:8px;padding:10px}.theme-WM,.theme-SAMS{--text:#102c51;--muted:#49627e;--line:#bfd1e8;--purple:#1766b7;--orange:#0071ce;color:var(--text)}.report.theme-WM,.report.theme-SAMS{background:#f0f6ff;border-color:#bfd1e8;border-top:7px solid #0071ce}.report.theme-WM{--orange:#8a6200;border-top-color:#ffc220}.report.theme-SAMS{border-top-color:#0067a0}.theme-WM .calendar>thead th,.theme-SAMS .calendar>thead th{color:#165896}.theme-WM .calendar>thead th:nth-last-child(-n+2){background:#ffc220;color:#102c51;border-radius:6px}.theme-SAMS .calendar>thead th:nth-last-child(-n+2){background:#0067a0;color:#fff;border-radius:6px}.theme-WM .calendar>tbody>tr>td,.theme-SAMS .calendar>tbody>tr>td{background:#fff;border-color:#c3d7ec}.theme-WM .calendar>tbody>tr>td.blank,.theme-SAMS .calendar>tbody>tr>td.blank{background:#e5edf7;color:#64788e;border-color:#c3d7ec}.theme-WM .day-metrics td,.theme-SAMS .day-metrics td{background:transparent;border:0;color:#102c51}.theme-WM .day-metrics th,.theme-SAMS .day-metrics th{color:#49627e!important;background:transparent}.theme-WM .day-metrics td.good,.theme-SAMS .day-metrics td.good{color:#005da6}.theme-WM .day-metrics td.low{color:#8a6200}.theme-SAMS .day-metrics td.low{color:#155b88}.theme-WM .track,.theme-SAMS .track{background:#d8e5f5}.theme-WM .track i{background:#ffc220}.theme-WM .track i.good{background:#0071ce}.theme-SAMS .track i{background:#55b7e7}.theme-SAMS .track i.good{background:#0067a0}.theme-WM .report-heading button{background:#0071ce;color:#fff;border-color:#0071ce}.theme-SAMS .report-heading button{background:#0067a0;color:#fff;border-color:#0067a0}.exporting.theme-WM,.exporting.theme-SAMS{background:#eef5ff!important}.theme-WM .report-note,.theme-SAMS .report-note{color:#49627e}.upload{flex-direction:row}@media(max-width:800px){.report-brand{gap:10px}.chain-logo{width:100px;height:48px;padding:6px}.report-heading{align-items:flex-start}.report-heading button{font-size:11px;padding:8px}.report-brand h3{overflow-wrap:anywhere}.filters #week{max-width:100%}}
 
-.theme-WM .chain-logo{background:#0071ce}
-.chain-logo{height:auto}
-@media(max-width:800px){.chain-logo{height:auto}}
+/* ==========================================
+   META PISO - ESTILOS WALMART Y SAM'S CLUB
+   ========================================== */
 
-/* Walmart: amarillo dominante con texto azul de alto contraste. */
-.report.theme-WM{background:#fff5cc;border-color:#e6b52c;border-top:9px solid #ffc220}
-.theme-WM .report-heading{background:#ffc220;margin:-22px -22px 18px;padding:22px;border-bottom:2px solid #e6b52c}
-.theme-WM .report-heading p{color:#254367}
-.theme-WM .calendar>thead th{background:#ffe28a;color:#16385e;border-radius:6px}
-.theme-WM .calendar>thead th:nth-last-child(-n+2){background:#ffc220;color:#102c51}
-.theme-WM .calendar>tbody>tr>td{background:#fffdf4;border-color:#e7c55d;border-top:4px solid #ffd45a}
-.theme-WM .calendar>tbody>tr>td:nth-last-child(-n+2){background:#fff0b3;border-color:#e6b52c}
-.theme-WM .calendar>tbody>tr>td.blank{background:#f4e8bb;border-color:#d8c58a;color:#665d40}
-.theme-WM .day-top b{color:#005da6}
-.theme-WM .track{background:#f0dda0}
-.theme-WM .track i{background:#e4a900}
-.theme-WM .totals{background:#ffc220;color:#254367;border:1px solid #e6b52c;border-radius:8px;padding:16px}
-.theme-WM .totals b{color:#102c51}
-.exporting.theme-WM{background:#fff5cc!important}
-@media(max-width:800px){.theme-WM .report-heading{margin:-14px -14px 18px;padding:14px}}
-.theme-WM .day-metrics td.percent-positive,.theme-SAMS .day-metrics td.percent-positive,.theme-WM .totals b.percent-positive,.theme-SAMS .totals b.percent-positive{color:#137333}
-.theme-WM .day-metrics td.percent-negative,.theme-SAMS .day-metrics td.percent-negative,.theme-WM .totals b.percent-negative,.theme-SAMS .totals b.percent-negative{color:#bd1e28}
-.theme-WM .day-metrics td.percent-neutral,.theme-SAMS .day-metrics td.percent-neutral,.theme-WM .totals b.percent-neutral,.theme-SAMS .totals b.percent-neutral{color:#102c51}
-.kpi:nth-child(3) strong.percent-positive{color:#72e6a2}
-.kpi:nth-child(3) strong.percent-negative{color:#ff858b}
+.report-brand {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    min-width: 0;
+}
+
+.chain-logo {
+    width: 160px;
+    height: auto;
+    object-fit: contain;
+    flex: none;
+    background: #fff;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.theme-WM,
+.theme-SAMS {
+    --text: #102c51;
+    --muted: #49627e;
+    --line: #bfd1e8;
+    --purple: #1766b7;
+    --orange: #0071ce;
+    color: var(--text);
+}
+
+.report.theme-WM,
+.report.theme-SAMS {
+    background: #f0f6ff;
+    border-color: #bfd1e8;
+    border-top: 7px solid #0071ce;
+}
+
+.report.theme-WM {
+    --orange: #8a6200;
+    border-top-color: #ffc220;
+}
+
+.report.theme-SAMS {
+    border-top-color: #0067a0;
+}
+
+/* ENCABEZADOS DEL CALENDARIO */
+
+.theme-WM .calendar > thead th,
+.theme-SAMS .calendar > thead th {
+    color: #165896;
+}
+
+.theme-WM .calendar > thead th:nth-last-child(-n+2) {
+    background: #ffc220;
+    color: #102c51;
+    border-radius: 6px;
+}
+
+.theme-SAMS .calendar > thead th:nth-last-child(-n+2) {
+    background: #0067a0;
+    color: #fff;
+    border-radius: 6px;
+}
+
+/* CELDAS DEL CALENDARIO */
+
+.theme-WM .calendar > tbody > tr > td,
+.theme-SAMS .calendar > tbody > tr > td {
+    background: #fff;
+    border-color: #c3d7ec;
+}
+
+.theme-WM .calendar > tbody > tr > td.blank,
+.theme-SAMS .calendar > tbody > tr > td.blank {
+    background: #e5edf7;
+    color: #64788e;
+    border-color: #c3d7ec;
+}
+
+/* MÉTRICAS */
+
+.theme-WM .day-metrics td,
+.theme-SAMS .day-metrics td {
+    background: transparent;
+    border: 0;
+    color: #102c51;
+}
+
+.theme-WM .day-metrics th,
+.theme-SAMS .day-metrics th {
+    color: #49627e !important;
+    background: transparent;
+}
+
+.theme-WM .day-metrics td.good,
+.theme-SAMS .day-metrics td.good {
+    color: #005da6;
+}
+
+.theme-WM .day-metrics td.low {
+    color: #8a6200;
+}
+
+.theme-SAMS .day-metrics td.low {
+    color: #155b88;
+}
+
+/* BARRAS DE PROGRESO */
+
+.theme-WM .track,
+.theme-SAMS .track {
+    background: #d8e5f5;
+}
+
+.theme-WM .track i {
+    background: #ffc220;
+}
+
+.theme-WM .track i.good {
+    background: #0071ce;
+}
+
+.theme-SAMS .track i {
+    background: #55b7e7;
+}
+
+.theme-SAMS .track i.good {
+    background: #0067a0;
+}
+
+/* BOTONES */
+
+.theme-WM .report-heading button {
+    background: #0071ce;
+    color: #fff;
+    border-color: #0071ce;
+}
+
+.theme-SAMS .report-heading button {
+    background: #0067a0;
+    color: #fff;
+    border-color: #0067a0;
+}
+
+/* EXPORTACIÓN */
+
+.exporting.theme-WM,
+.exporting.theme-SAMS {
+    background: #eef5ff !important;
+}
+
+.theme-WM .report-note,
+.theme-SAMS .report-note {
+    color: #49627e;
+}
+
+.upload {
+    flex-direction: row;
+}
+
+/* LOGOTIPO WALMART */
+
+.theme-WM .chain-logo {
+    background: #0071ce;
+}
+
+/* ==========================================
+   DISEÑO ESPECÍFICO WALMART
+   ========================================== */
+
+.report.theme-WM {
+    background: #fff5cc;
+    border-color: #e6b52c;
+    border-top: 9px solid #ffc220;
+}
+
+.theme-WM .report-heading {
+    background: #ffc220;
+    margin: -22px -22px 18px;
+    padding: 22px;
+    border-bottom: 2px solid #e6b52c;
+}
+
+.theme-WM .report-heading p {
+    color: #254367;
+}
+
+.theme-WM .calendar > thead th {
+    background: #ffe28a;
+    color: #16385e;
+    border-radius: 6px;
+}
+
+.theme-WM .calendar > thead th:nth-last-child(-n+2) {
+    background: #ffc220;
+    color: #102c51;
+}
+
+.theme-WM .calendar > tbody > tr > td {
+    background: #fffdf4;
+    border-color: #e7c55d;
+    border-top: 4px solid #ffd45a;
+}
+
+.theme-WM .calendar > tbody > tr > td:nth-last-child(-n+2) {
+    background: #fff0b3;
+    border-color: #e6b52c;
+}
+
+.theme-WM .calendar > tbody > tr > td.blank {
+    background: #f4e8bb;
+    border-color: #d8c58a;
+    color: #665d40;
+}
+
+.theme-WM .day-top b {
+    color: #005da6;
+}
+
+.theme-WM .track {
+    background: #f0dda0;
+}
+
+.theme-WM .track i {
+    background: #e4a900;
+}
+
+.theme-WM .totals {
+    background: #ffc220;
+    color: #254367;
+    border: 1px solid #e6b52c;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.theme-WM .totals b {
+    color: #102c51;
+}
+
+.exporting.theme-WM {
+    background: #fff5cc !important;
+}
+
+/* ==========================================
+   COLORES DE PORCENTAJES
+   WALMART: MAYOR A 30% VERDE
+   SAM'S: MAYOR A 60% VERDE
+   ========================================== */
+
+/* VERDE - CUMPLIMIENTO SUPERIOR AL LÍMITE */
+
+.theme-WM .day-metrics td.percent-positive,
+.theme-SAMS .day-metrics td.percent-positive,
+.theme-WM .totals b.percent-positive,
+.theme-SAMS .totals b.percent-positive {
+    color: #137333 !important;
+}
+
+/* ROJO - CUMPLIMIENTO INFERIOR AL LÍMITE */
+
+.theme-WM .day-metrics td.percent-negative,
+.theme-SAMS .day-metrics td.percent-negative,
+.theme-WM .totals b.percent-negative,
+.theme-SAMS .totals b.percent-negative {
+    color: #bd1e28 !important;
+}
+
+/* AZUL - CUMPLIMIENTO IGUAL AL LÍMITE */
+
+.theme-WM .day-metrics td.percent-neutral,
+.theme-SAMS .day-metrics td.percent-neutral,
+.theme-WM .totals b.percent-neutral,
+.theme-SAMS .totals b.percent-neutral {
+    color: #102c51 !important;
+}
+
+/* KPI DE CUMPLIMIENTO */
+
+.kpi:nth-child(3) strong.percent-positive {
+    color: #72e6a2;
+}
+
+.kpi:nth-child(3) strong.percent-negative {
+    color: #ff858b;
+}
+
+/* ==========================================
+   DISEÑO RESPONSIVO
+   ========================================== */
+
+@media (max-width: 800px) {
+    .report-brand {
+        gap: 10px;
+    }
+
+    .chain-logo {
+        width: 100px;
+        height: auto;
+        padding: 6px;
+    }
+
+    .report-heading {
+        align-items: flex-start;
+    }
+
+    .report-heading button {
+        font-size: 11px;
+        padding: 8px;
+    }
+
+    .report-brand h3 {
+        overflow-wrap: anywhere;
+    }
+
+    .filters #week {
+        max-width: 100%;
+    }
+
+    .theme-WM .report-heading {
+        margin: -14px -14px 18px;
+        padding: 14px;
+    }
+}
