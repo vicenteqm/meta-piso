@@ -3,3 +3,20 @@
 .theme-WM .chain-logo{background:#0071ce}
 .chain-logo{height:auto}
 @media(max-width:800px){.chain-logo{height:auto}}
+
+/* Walmart: amarillo dominante con texto azul de alto contraste. */
+.report.theme-WM{background:#fff5cc;border-color:#e6b52c;border-top:9px solid #ffc220}
+.theme-WM .report-heading{background:#ffc220;margin:-22px -22px 18px;padding:22px;border-bottom:2px solid #e6b52c}
+.theme-WM .report-heading p{color:#254367}
+.theme-WM .calendar>thead th{background:#ffe28a;color:#16385e;border-radius:6px}
+.theme-WM .calendar>thead th:nth-last-child(-n+2){background:#ffc220;color:#102c51}
+.theme-WM .calendar>tbody>tr>td{background:#fffdf4;border-color:#e7c55d;border-top:4px solid #ffd45a}
+.theme-WM .calendar>tbody>tr>td:nth-last-child(-n+2){background:#fff0b3;border-color:#e6b52c}
+.theme-WM .calendar>tbody>tr>td.blank{background:#f4e8bb;border-color:#d8c58a;color:#665d40}
+.theme-WM .day-top b{color:#005da6}
+.theme-WM .track{background:#f0dda0}
+.theme-WM .track i{background:#e4a900}
+.theme-WM .totals{background:#ffc220;color:#254367;border:1px solid #e6b52c;border-radius:8px;padding:16px}
+.theme-WM .totals b{color:#102c51}
+.exporting.theme-WM{background:#fff5cc!important}
+@media(max-width:800px){.theme-WM .report-heading{margin:-14px -14px 18px;padding:14px}}
