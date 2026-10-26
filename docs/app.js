@@ -430,17 +430,13 @@ function report(label, stores, dates, index) {
                         ></i>
                     </div>
 
-                    <div class="tiendas-meta ${estadoTiendas}">
-                        <div class="tiendas-meta-info">
-                            <span class="tiendas-meta-label">
-                                Tiendas que lograron meta
-                            </span>
+                    
+<div class="tiendas-meta ${estadoTiendas}">
+    <span>
+        Tiendas ${tiendas.lograron}/${tiendas.total} alcanzadas
+    </span>
+</div>
 
-                            <strong class="tiendas-meta-numero">
-                                ${tiendas.lograron}
-                                <small>/ ${tiendas.total}</small>
-                            </strong>
-                        </div>
 
                         <div class="tiendas-meta-barra">
                             <span
