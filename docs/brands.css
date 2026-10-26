@@ -10,14 +10,26 @@
     min-width: 0;
 }
 
+/* LOGOTIPOS MÁS GRANDES */
+
 .chain-logo {
-    width: 160px;
+    width: 280px;
     height: auto;
     object-fit: contain;
     flex: none;
     background: #fff;
     border-radius: 8px;
-    padding: 10px;
+    padding: 12px;
+}
+
+/* LOGOTIPOS EN PANTALLAS PEQUEÑAS */
+
+@media (max-width: 800px) {
+    .chain-logo {
+        width: 180px;
+        height: auto;
+        padding: 8px;
+    }
 }
 
 .theme-WM,
