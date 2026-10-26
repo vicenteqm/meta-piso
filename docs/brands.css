@@ -336,3 +336,45 @@
         padding: 14px;
     }
 }
+
+
+/* ========================================
+   LOGOTIPOS EXTRA GRANDES
+   WALMART Y SAM'S CLUB
+   ======================================== */
+
+.report.theme-WM .chain-logo,
+.report.theme-SAMS .chain-logo {
+    width: 400px !important;
+    max-width: 100%;
+    height: auto !important;
+    object-fit: contain;
+    padding: 8px;
+    flex-shrink: 0;
+}
+
+/* AJUSTAR EL ENCABEZADO */
+
+.report.theme-WM .report-brand,
+.report.theme-SAMS .report-brand {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+/* PANTALLAS PEQUEÑAS */
+
+@media (max-width: 800px) {
+    .report.theme-WM .chain-logo,
+    .report.theme-SAMS .chain-logo {
+        width: 240px !important;
+        max-width: 100%;
+        height: auto !important;
+    }
+
+    .report.theme-WM .report-brand,
+    .report.theme-SAMS .report-brand {
+        flex-wrap: wrap;
+    }
+}
+
