@@ -562,9 +562,13 @@ function report(label, stores, dates, index) {
 
                     <!-- INDICADOR COMPACTO -->
 
-                    <div class="tiendas-meta ${estadoTiendas}">
-                        Alcanzadas ${tiendas.lograron}/${tiendas.total} tiendas
-                    </div>
+                   
+<div class="tiendas-meta ${estadoTiendas}">
+    <span class="tiendas-meta-texto">
+        Alcanzadas ${tiendas.lograron}/${tiendas.total} tiendas
+    </span>
+</div>
+
                 </td>
             `;
         }
