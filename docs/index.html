@@ -13,19 +13,20 @@
     <title>META PISO · Calendario de aprobadas</title>
 
     <!-- ESTILOS -->
-    <link rel="stylesheet" href="style.css?v=10">
-    <link rel="stylesheet" href="brands.css?v=10">
+    <link rel="stylesheet" href="style.css?v=28">
+    <link rel="stylesheet" href="brands.css?v=28">
 
     <!-- LIBRERÍAS -->
     <script defer src="vendor/xlsx.full.min.js"></script>
     <script defer src="vendor/html2canvas.min.js"></script>
 
     <!-- SISTEMA META PISO -->
-    <script defer src="core.js?v=10"></script>
+    <script defer src="core.js?v=28"></script>
     <script defer src="seed.js"></script>
     <script defer src="weeks.js"></script>
     <script defer src="brands.js"></script>
-    <script defer src="app.js?v=10"></script>
+    <script defer src="diagnostico.js?v=28"></script>
+    <script defer src="app.js?v=28"></script>
 </head>
 
 <body>
@@ -123,6 +124,24 @@
 
                 <input
                     id="baseFile"
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                >
+            </label>
+
+            <!-- NUEVA CARGA DE PLANTILLA -->
+            <label class="upload">
+                <span class="upload-icon">♙</span>
+
+                <span>
+                    <b>Cargar plantilla activa</b>
+                    <small id="plantillaName">
+                        Excel de personal · ACTIVO
+                    </small>
+                </span>
+
+                <input
+                    id="plantillaFile"
                     type="file"
                     accept=".xlsx,.xls,.csv"
                 >
@@ -248,9 +267,14 @@
         </section>
 
         <p class="hint">
-            En cada día: meta, aprobadas, cumplimiento,
-            aprobadas finalizadas, porcentaje de aprobación,
-            tiendas alcanzadas y tiendas sin ingresos.
+            En cada día se muestra la meta, las aprobadas,
+            el cumplimiento, las aprobadas finalizadas
+            y el porcentaje de aprobación.
+
+            El diagnóstico clasifica las tiendas en:
+            sin cobertura, cubiertas sin ingresos,
+            ingresos bajo meta y meta alcanzada.
+
             Las imágenes respetan los filtros y el periodo.
         </p>
 
@@ -287,14 +311,43 @@
                 Las tiendas OPERANDO sin actividad cuentan
                 en la meta.
 
-                Tiendas alcanzadas = tiendas que cumplen
-                o superan su meta individual del día.
+                La cobertura se determina mediante la
+                plantilla de personal cargada, considerando
+                únicamente registros con ESTATUS ACTIVO
+                y puestos de promotor o sublíder.
 
-                Tiendas sin ingresos = tiendas OPERANDO
-                sin trámites registrados en el día.
+                No se utilizan las claves de asistencia
+                A o R para determinar cobertura.
+            </p>
 
-                Las metas editadas aplican al periodo
-                completo mostrado.
+            <p>
+                Sin cobertura: tienda sin personal activo
+                identificado y sin ingresos.
+
+                Cubiertas sin ingresos: tienda con personal
+                activo identificado, pero sin trámites
+                ingresados en el día.
+
+                Ingresos bajo meta: tienda con ingresos
+                registrados que no alcanzó su meta diaria
+                de aprobadas.
+
+                Meta alcanzada: tienda cuyas aprobadas
+                cumplen o superan su meta individual.
+            </p>
+
+            <p>
+                Cada tienda pertenece a una sola categoría.
+
+                Cuando una tienda tiene ingresos pero no
+                aparece personal activo asignado, se
+                clasifica por productividad y se genera
+                una alerta independiente.
+
+                La plantilla refleja el personal activo
+                del archivo cargado; no reconstruye
+                automáticamente la cobertura histórica
+                de cada fecha.
             </p>
 
             <p>
@@ -307,8 +360,11 @@
 
                 Cargar un detalle reemplaza al anterior.
 
-                Los datos cargados y las metas se guardan
-                en este navegador.
+                Los datos de Records, la base de tiendas
+                y las metas se guardan en este navegador.
+
+                La plantilla activa debe volver a cargarse
+                al recargar la página.
             </p>
 
         </details>
