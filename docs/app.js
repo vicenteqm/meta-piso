@@ -1,31 +1,28 @@
 
 'use strict';
 
-/* ==========================================
-   META PISO - APLICACIÓN PRINCIPAL
-   ========================================== */
-
 const C = MetaPiso;
-
 const $ = id => document.getElementById(id);
 
 const fmt = n => new Intl.NumberFormat('es-MX', {
     maximumFractionDigits: 1
 }).format(n);
 
-const pct = n => n === null ? '—' : fmt(n) + '%';
+const pct = n =>
+    n === null || n === undefined
+        ? '—'
+        : fmt(n) + '%';
 
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-}[c]));
-
-/* ==========================================
-   ESTADO Y CONFIGURACIÓN
-   ========================================== */
+const esc = s => String(s ?? '').replace(
+    /[&<>"']/g,
+    c => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[c])
+);
 
 let state = structuredClone(window.META_SEED);
 let raw = state.raw || null;
@@ -70,10 +67,6 @@ function save() {
     }
 }
 
-/* ==========================================
-   TIENDAS Y FILTROS
-   ========================================== */
-
 function active() {
     return state.stores.filter(s =>
         s.status === 'OPERANDO' &&
@@ -84,13 +77,15 @@ function active() {
 function options(node, items, first) {
     const prev = node.value;
 
-    node.replaceChildren(new Option(first, ''));
+    node.replaceChildren(
+        new Option(first, '')
+    );
 
     for (const [value, label] of items) {
         node.add(new Option(label, value));
     }
 
-    if (items.some(item => item[0] === prev)) {
+    if (items.some(x => x[0] === prev)) {
         node.value = prev;
     }
 }
@@ -138,14 +133,10 @@ function filters(changed = '') {
     options(
         $('chain'),
         [...new Set(
-            list
-                .filter(s =>
-                    !region || s.region === region
-                )
-                .map(s => s.chain)
-        )]
-            .sort()
-            .map(chain => [chain, chain]),
+            list.filter(s =>
+                !region || s.region === region
+            ).map(s => s.chain)
+        )].sort().map(c => [c, c]),
         'WM + SAMS'
     );
 
@@ -154,54 +145,32 @@ function filters(changed = '') {
     options(
         $('region'),
         [...new Set(
-            list
-                .filter(s =>
-                    !chain || s.chain === chain
-                )
-                .map(s => s.region)
-        )]
-            .sort((a, b) =>
-                a.localeCompare(b, 'es', {
-                    numeric: true
-                })
-            )
-            .map(region => [region, region]),
+            list.filter(s =>
+                !chain || s.chain === chain
+            ).map(s => s.region)
+        )].sort((a, b) =>
+            a.localeCompare(b, 'es', {
+                numeric: true
+            })
+        ).map(r => [r, r]),
         'Todas las regiones'
     );
 
     options(
         $('store'),
-        list
-            .filter(s =>
-                (!chain || s.chain === chain) &&
-                (!$('region').value ||
-                    s.region === $('region').value)
-            )
-            .sort((a, b) =>
-                a.name.localeCompare(b.name, 'es')
-            )
-            .map(s => [
-                s.key,
-                `${s.chain} ${s.id} · ${s.name}`
-            ]),
+        list.filter(s =>
+            (!chain || s.chain === chain) &&
+            (!$('region').value ||
+                s.region === $('region').value)
+        ).sort((a, b) =>
+            a.name.localeCompare(b.name, 'es')
+        ).map(s => [
+            s.key,
+            `${s.chain} ${s.id} · ${s.name}`
+        ]),
         'Todas las tiendas'
     );
 }
-
-function selected() {
-    return active().filter(s =>
-        (!$('chain').value ||
-            s.chain === $('chain').value) &&
-        (!$('region').value ||
-            s.region === $('region').value) &&
-        (!$('store').value ||
-            s.key === $('store').value)
-    );
-}
-
-/* ==========================================
-   MARCAS Y PORCENTAJES
-   ========================================== */
 
 function brand(stores) {
     const chains = [
@@ -216,11 +185,12 @@ function brand(stores) {
 function percentClass(stores, value) {
     const chain = brand(stores);
 
-    const limit = chain === 'WM'
-        ? 30
-        : chain === 'SAMS'
-            ? 60
-            : null;
+    const limit =
+        chain === 'WM'
+            ? 30
+            : chain === 'SAMS'
+                ? 60
+                : null;
 
     if (
         value === null ||
@@ -247,29 +217,12 @@ function brandLogo(stores) {
         : '';
 }
 
-/* ==========================================
-   FECHAS Y SEMANAS
-   ========================================== */
-
 function periodLabel(dates) {
     const weeks = new Set(
         dates.map(MetaWeeks.monday)
     );
 
     return `${dates[0]} al ${dates.at(-1)} · ${dates.length} días seleccionados · ${weeks.size} semanas`;
-}
-
-function initDates() {
-    $('from').value = state.data.start;
-    $('to').value = state.data.end;
-
-    for (const element of [
-        $('from'),
-        $('to')
-    ]) {
-        element.min = state.data.start;
-        element.max = state.data.end;
-    }
 }
 
 function filteredWeeks(stores) {
@@ -304,9 +257,29 @@ function filteredWeeks(stores) {
     );
 }
 
-/* ==========================================
-   CÁLCULOS DE PRODUCTIVIDAD
-   ========================================== */
+function selected() {
+    return active().filter(s =>
+        (!$('chain').value ||
+            s.chain === $('chain').value) &&
+        (!$('region').value ||
+            s.region === $('region').value) &&
+        (!$('store').value ||
+            s.key === $('store').value)
+    );
+}
+
+function initDates() {
+    $('from').value = state.data.start;
+    $('to').value = state.data.end;
+
+    for (const element of [
+        $('from'),
+        $('to')
+    ]) {
+        element.min = state.data.start;
+        element.max = state.data.end;
+    }
+}
 
 function total(stores, dates) {
     const out = {
@@ -316,7 +289,7 @@ function total(stores, dates) {
     };
 
     for (const day of dates) {
-        const metric = C.metric(
+        const m = C.metric(
             stores,
             state.data,
             day,
@@ -325,7 +298,7 @@ function total(stores, dates) {
         );
 
         for (const key of Object.keys(out)) {
-            out[key] += metric[key];
+            out[key] += m[key];
         }
     }
 
@@ -337,15 +310,14 @@ function total(stores, dates) {
 }
 
 /* ==========================================
-   TIENDAS QUE ALCANZARON META
+   TIENDAS ALCANZADAS
    ========================================== */
 
 function tiendasConMeta(stores, day) {
     let lograron = 0;
-    let totalTiendas = 0;
 
     for (const store of stores) {
-        const metric = C.metric(
+        const m = C.metric(
             [store],
             state.data,
             day,
@@ -353,11 +325,9 @@ function tiendasConMeta(stores, day) {
             overrides
         );
 
-        totalTiendas++;
-
         if (
-            metric.meta > 0 &&
-            metric.approved >= metric.meta
+            m.meta > 0 &&
+            m.approved >= m.meta
         ) {
             lograron++;
         }
@@ -365,12 +335,44 @@ function tiendasConMeta(stores, day) {
 
     return {
         lograron,
-        total: totalTiendas
+        total: stores.length
     };
 }
 
 /* ==========================================
-   GENERACIÓN DEL CALENDARIO
+   TIENDAS SIN INGRESOS
+   ========================================== */
+
+function tiendasSinIngresos(stores, day) {
+    if (!stores.length) return 0;
+
+    let sinIngresos = 0;
+
+    for (const store of stores) {
+        const registro = state.data.counts[
+            store.key + '|' + day
+        ];
+
+        if (
+            registro &&
+            typeof registro.ingresos !== 'number'
+        ) {
+            return null;
+        }
+
+        if (
+            !registro ||
+            registro.ingresos === 0
+        ) {
+            sinIngresos++;
+        }
+    }
+
+    return sinIngresos;
+}
+
+/* ==========================================
+   REPORTE Y CALENDARIO
    ========================================== */
 
 function report(label, stores, dates, index) {
@@ -411,9 +413,7 @@ function report(label, stores, dates, index) {
     const chosen = new Set(dates);
 
     const weekStarts = [
-        ...new Set(
-            dates.map(MetaWeeks.monday)
-        )
+        ...new Set(dates.map(MetaWeeks.monday))
     ];
 
     const all = weekStarts.flatMap(start =>
@@ -436,8 +436,8 @@ function report(label, stores, dates, index) {
                             'Viernes',
                             'Sábado',
                             'Domingo'
-                        ].map(day => `
-                            <th scope="col">${day}</th>
+                        ].map(d => `
+                            <th scope="col">${d}</th>
                         `).join('')}
                     </tr>
                 </thead>
@@ -454,9 +454,7 @@ function report(label, stores, dates, index) {
             html += `
                 <td class="blank">
                     <div class="day-top">
-                        <b>
-                            ${Number(day.slice(-2))}
-                        </b>
+                        <b>${Number(day.slice(-2))}</b>
                     </div>
 
                     ${
@@ -467,8 +465,9 @@ function report(label, stores, dates, index) {
                     }
                 </td>
             `;
+
         } else {
-            const metric = C.metric(
+            const m = C.metric(
                 stores,
                 state.data,
                 day,
@@ -477,10 +476,15 @@ function report(label, stores, dates, index) {
             );
 
             const good =
-                metric.percent !== null &&
-                metric.percent >= 100;
+                m.percent !== null &&
+                m.percent >= 100;
 
             const tiendas = tiendasConMeta(
+                stores,
+                day
+            );
+
+            const sinIngresos = tiendasSinIngresos(
                 stores,
                 day
             );
@@ -494,10 +498,7 @@ function report(label, stores, dates, index) {
                         : 'sin-meta';
 
             const clasePorcentaje = chain
-                ? percentClass(
-                    stores,
-                    metric.percent
-                )
+                ? percentClass(stores, m.percent)
                 : good
                     ? 'good'
                     : 'low';
@@ -509,8 +510,8 @@ function report(label, stores, dates, index) {
                             ${Number(day.slice(-2))}
                         </b>
 
-                        <span>
-                            ${day.slice(5, 7)}/${day.slice(0, 4)}
+                        <span class="aprobacion-dia">
+                            Aprobación: ${pct(m.approvalRate ?? null)}
                         </span>
                     </div>
 
@@ -526,21 +527,14 @@ function report(label, stores, dates, index) {
 
                         <tbody>
                             <tr>
-                                <td>
-                                    ${fmt(metric.meta)}
-                                </td>
-
-                                <td>
-                                    ${fmt(metric.approved)}
-                                </td>
+                                <td>${fmt(m.meta)}</td>
+                                <td>${fmt(m.approved)}</td>
 
                                 <td class="${clasePorcentaje}">
-                                    ${pct(metric.percent)}
+                                    ${pct(m.percent)}
                                 </td>
 
-                                <td>
-                                    ${fmt(metric.finalized)}
-                                </td>
+                                <td>${fmt(m.finalized)}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -551,24 +545,25 @@ function report(label, stores, dates, index) {
                             style="width:${
                                 Math.min(
                                     100,
-                                    Math.max(
-                                        0,
-                                        metric.percent || 0
-                                    )
+                                    Math.max(0, m.percent || 0)
                                 )
                             }%"
                         ></i>
                     </div>
 
-                    <!-- INDICADOR COMPACTO -->
+                    <div class="tiendas-meta ${estadoTiendas}">
+                        <span class="tiendas-meta-texto">
+                            Alcanzadas ${tiendas.lograron}/${tiendas.total} tiendas
+                        </span>
 
-                   
-<div class="tiendas-meta ${estadoTiendas}">
-    <span class="tiendas-meta-texto">
-        Alcanzadas ${tiendas.lograron}/${tiendas.total} tiendas
-    </span>
-</div>
-
+                        <span class="tiendas-sin-ingresos">
+                            ${
+                                sinIngresos === null
+                                    ? 'Sin ingresos: recarga Records'
+                                    : sinIngresos + ' tiendas sin ingresos'
+                            }
+                        </span>
+                    </div>
                 </td>
             `;
         }
@@ -589,13 +584,11 @@ function report(label, stores, dates, index) {
         html + `
             <div class="totals">
                 <span>
-                    Meta
-                    <b>${fmt(sum.meta)}</b>
+                    Meta <b>${fmt(sum.meta)}</b>
                 </span>
 
                 <span>
-                    Aprobadas
-                    <b>${fmt(sum.approved)}</b>
+                    Aprobadas <b>${fmt(sum.approved)}</b>
                 </span>
 
                 <span>
@@ -625,7 +618,7 @@ function report(label, stores, dates, index) {
 }
 
 /* ==========================================
-   RENDERIZAR TABLERO
+   RENDERIZAR
    ========================================== */
 
 function render() {
@@ -648,7 +641,6 @@ function render() {
             state.data.end;
 
         $('downloadAll').disabled = true;
-
         $('reports').replaceChildren();
         $('kpis').replaceChildren();
 
@@ -665,7 +657,6 @@ function render() {
     }
 
     const stores = selected();
-
     const weeks = filteredWeeks(stores);
 
     dates = weeks.flatMap(w => w.dates);
@@ -683,14 +674,10 @@ function render() {
     $('baseName').textContent = state.baseName;
 
     $('wmRule').textContent =
-        goals.WM.weekday +
-        ' / ' +
-        goals.WM.weekend;
+        goals.WM.weekday + ' / ' + goals.WM.weekend;
 
     $('samsRule').textContent =
-        goals.SAMS.weekday +
-        ' / ' +
-        goals.SAMS.weekend;
+        goals.SAMS.weekday + ' / ' + goals.SAMS.weekend;
 
     $('kpis').innerHTML = [
         [
@@ -733,17 +720,16 @@ function render() {
     `).join('');
 
     const view = $('view').value;
-
     const groups = new Map();
 
-    for (const store of dates.length ? stores : []) {
+    for (const s of dates.length ? stores : []) {
         const label =
             view === 'chain'
-                ? store.chain
+                ? s.chain
                 : view === 'region'
-                    ? store.region
+                    ? s.region
                     : view === 'store'
-                        ? `${store.chain} ${store.id} · ${store.name}`
+                        ? `${s.chain} ${s.id} · ${s.name}`
                         : 'General · ' +
                           (brand(stores) || 'WM + SAMS');
 
@@ -751,7 +737,7 @@ function render() {
             groups.set(label, []);
         }
 
-        groups.get(label).push(store);
+        groups.get(label).push(s);
     }
 
     lastGroups = [...groups]
@@ -769,11 +755,11 @@ function render() {
         }));
 
     $('reports').replaceChildren(
-        ...lastGroups.map((group, i) =>
+        ...lastGroups.map((g, i) =>
             report(
-                group.label,
-                group.stores,
-                group.dates,
+                g.label,
+                g.stores,
+                g.dates,
                 i
             )
         )
@@ -788,7 +774,7 @@ function render() {
             '<p class="empty">No hay tiendas OPERANDO con estos filtros.</p>';
     }
 
-    const audit = state.data.audit;
+    const a = state.data.audit;
 
     $('audit').innerHTML = `
         <p>
@@ -798,22 +784,22 @@ function render() {
         </p>
 
         <p>
-            Filas de entrada: ${fmt(audit.input)}
-            · Folio/fecha inválidos: ${fmt(audit.invalid)}
-            · Duplicados idénticos: ${fmt(audit.duplicates)}
-            · IKEA: ${fmt(audit.ikea)}
-            · Fuera de base o sin coincidencia: ${fmt(audit.unmatched)}
-            · No OPERANDO: ${fmt(audit.inactive)}
-            · CH: ${fmt(audit.other)}
+            Filas de entrada: ${fmt(a.input)}
+            · Folio/fecha inválidos: ${fmt(a.invalid)}
+            · Duplicados idénticos: ${fmt(a.duplicates)}
+            · IKEA: ${fmt(a.ikea)}
+            · Fuera de base o sin coincidencia: ${fmt(a.unmatched)}
+            · No OPERANDO: ${fmt(a.inactive)}
+            · CH: ${fmt(a.other)}
         </p>
     ` + (
-        audit.unmatched
+        a.unmatched
             ? `<p>Sin coincidencia: ${
                 esc(
                     Object.entries(
                         state.data.unknown || {}
-                    ).map(([key, value]) =>
-                        key + ' (' + value + ')'
+                    ).map(([k, v]) =>
+                        k + ' (' + v + ')'
                     ).join(', ')
                 )
             }</p>`
@@ -857,16 +843,16 @@ async function read(file, kind) {
     let found = null;
 
     for (const name of wb.SheetNames) {
-        const sheet = wb.Sheets[name];
+        const s = wb.Sheets[name];
 
-        if (!sheet['!ref']) continue;
+        if (!s['!ref']) continue;
 
         const range = XLSX.utils.decode_range(
-            sheet['!ref']
+            s['!ref']
         );
 
         const top = XLSX.utils.sheet_to_json(
-            sheet,
+            s,
             {
                 header: 1,
                 defval: '',
@@ -892,9 +878,9 @@ async function read(file, kind) {
                 'ESTATUS DEL PROCESO'
             ];
 
-        if (!top.some(row =>
-            required.every(header =>
-                row.map(C.norm).includes(header)
+        if (!top.some(r =>
+            required.every(h =>
+                r.map(C.norm).includes(h)
             )
         )) {
             continue;
@@ -902,10 +888,10 @@ async function read(file, kind) {
 
         let max = 0;
 
-        for (const key of Object.keys(sheet)) {
+        for (const key of Object.keys(s)) {
             if (key[0] === '!') continue;
 
-            const cell = sheet[key];
+            const cell = s[key];
 
             if (
                 cell.v !== undefined &&
@@ -920,7 +906,7 @@ async function read(file, kind) {
         }
 
         found = XLSX.utils.sheet_to_json(
-            sheet,
+            s,
             {
                 header: 1,
                 defval: '',
@@ -947,14 +933,14 @@ async function read(file, kind) {
 }
 
 /* ==========================================
-   CARGAR BASE Y PRODUCTIVIDAD
+   CARGA DE ARCHIVOS
    ========================================== */
 
 for (const kind of ['base', 'detail']) {
     $(kind + 'File').addEventListener(
         'change',
-        async event => {
-            const file = event.target.files[0];
+        async e => {
+            const file = e.target.files[0];
 
             if (!file) return;
 
@@ -965,8 +951,8 @@ for (const kind of ['base', 'detail']) {
             $('detailFile').disabled = true;
 
             try {
-                await new Promise(resolve =>
-                    setTimeout(resolve, 30)
+                await new Promise(r =>
+                    setTimeout(r, 30)
                 );
 
                 const rows = await read(
@@ -1028,13 +1014,13 @@ for (const kind of ['base', 'detail']) {
 
                 save();
 
-            } catch (error) {
+            } catch (err) {
                 $('message').textContent =
                     'No se reemplazaron los datos: ' +
-                    error.message;
+                    err.message;
 
             } finally {
-                event.target.value = '';
+                e.target.value = '';
 
                 $('baseFile').disabled = false;
                 $('detailFile').disabled = false;
@@ -1044,7 +1030,7 @@ for (const kind of ['base', 'detail']) {
 }
 
 /* ==========================================
-   EVENTOS DE FILTROS
+   FILTROS
    ========================================== */
 
 for (const name of [
@@ -1111,9 +1097,9 @@ function populateGoals() {
 
     options(
         $('overrideStore'),
-        active().map(store => [
-            store.key,
-            `${store.chain} ${store.id} · ${store.name}`
+        active().map(s => [
+            s.key,
+            `${s.chain} ${s.id} · ${s.name}`
         ]),
         'Sin excepción'
     );
@@ -1122,15 +1108,15 @@ function populateGoals() {
 }
 
 function loadOverride() {
-    const override = overrides[
+    const o = overrides[
         $('overrideStore').value
     ];
 
     $('overrideWeek').value =
-        override?.weekday ?? '';
+        o?.weekday ?? '';
 
     $('overrideEnd').value =
-        override?.weekend ?? '';
+        o?.weekend ?? '';
 }
 
 $('settingsButton').onclick = () => {
@@ -1144,8 +1130,8 @@ $('closeSettings').onclick = () => {
 
 $('overrideStore').onchange = loadOverride;
 
-$('goalsForm').onsubmit = event => {
-    event.preventDefault();
+$('goalsForm').onsubmit = e => {
+    e.preventDefault();
 
     const key = $('overrideStore').value;
     const w = $('overrideWeek').value;
@@ -1171,6 +1157,7 @@ $('goalsForm').onsubmit = event => {
             weekday: Number($('wmWeek').value),
             weekend: Number($('wmEnd').value)
         },
+
         SAMS: {
             weekday: Number($('samsWeek').value),
             weekend: Number($('samsEnd').value)
@@ -1197,11 +1184,11 @@ $('goalsForm').onsubmit = event => {
     save();
 };
 
-for (const element of [
+for (const el of [
     $('overrideWeek'),
     $('overrideEnd')
 ]) {
-    element.oninput = () => {
+    el.oninput = () => {
         $('overrideWeek').setCustomValidity('');
     };
 }
@@ -1219,7 +1206,7 @@ $('restoreGoals').onclick = () => {
 };
 
 /* ==========================================
-   EXPORTACIÓN DE IMÁGENES
+   EXPORTAR IMÁGENES
    ========================================== */
 
 async function download(groups, name) {
@@ -1227,9 +1214,7 @@ async function download(groups, name) {
         ...document.querySelectorAll('button')
     ];
 
-    buttons.forEach(button => {
-        button.disabled = true;
-    });
+    buttons.forEach(b => b.disabled = true);
 
     $('message').textContent =
         'Preparando imagen…';
@@ -1237,7 +1222,7 @@ async function download(groups, name) {
     const wrap = document.createElement('div');
 
     const chain = brand(
-        groups.flatMap(group => group.stores)
+        groups.flatMap(g => g.stores)
     );
 
     wrap.className =
@@ -1252,12 +1237,12 @@ async function download(groups, name) {
         esc(name) +
         '</h2>';
 
-    for (const group of groups) {
+    for (const g of groups) {
         wrap.append(
             report(
-                group.label,
-                group.stores,
-                group.dates,
+                g.label,
+                g.stores,
+                g.dates,
                 -1
             )
         );
@@ -1297,8 +1282,8 @@ async function download(groups, name) {
         const blob = await new Promise(
             (resolve, reject) => {
                 canvas.toBlob(
-                    result => result
-                        ? resolve(result)
+                    b => b
+                        ? resolve(b)
                         : reject(
                             Error(
                                 'No se pudo generar la imagen.'
@@ -1310,11 +1295,12 @@ async function download(groups, name) {
         );
 
         const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
 
-        link.href = url;
+        const a = document.createElement('a');
 
-        link.download =
+        a.href = url;
+
+        a.download =
             'META_PISO_' +
             (chain ? chain + '_' : '') +
             name.replace(/[^a-z0-9]/gi, '_') +
@@ -1324,7 +1310,7 @@ async function download(groups, name) {
             groups.at(-1).dates.at(-1) +
             '.png';
 
-        link.click();
+        a.click();
 
         setTimeout(
             () => URL.revokeObjectURL(url),
@@ -1334,16 +1320,15 @@ async function download(groups, name) {
         $('message').textContent =
             'Imagen descargada.';
 
-    } catch (error) {
-        $('message').textContent =
-            error.message;
+    } catch (e) {
+        $('message').textContent = e.message;
 
     } finally {
         wrap.remove();
 
-        buttons.forEach(button => {
-            button.disabled = false;
-        });
+        buttons.forEach(
+            b => b.disabled = false
+        );
 
         $('downloadAll').disabled =
             !lastGroups.length;
@@ -1354,19 +1339,19 @@ async function download(groups, name) {
    BOTONES DE DESCARGA
    ========================================== */
 
-$('reports').onclick = event => {
-    const button = event.target.closest(
+$('reports').onclick = e => {
+    const b = e.target.closest(
         '[data-download]'
     );
 
-    if (button) {
-        const group = lastGroups[
-            Number(button.dataset.download)
+    if (b) {
+        const g = lastGroups[
+            Number(b.dataset.download)
         ];
 
         download(
-            [group],
-            group.label
+            [g],
+            g.label
         );
     }
 };
@@ -1379,6 +1364,7 @@ $('downloadAll').onclick = () => {
                     'General · ' +
                     (brand(selected()) || 'WM + SAMS') +
                     ' · selección actual',
+
                 stores: selected(),
                 dates: lastGroups[0].dates
             }],
@@ -1388,7 +1374,7 @@ $('downloadAll').onclick = () => {
 };
 
 /* ==========================================
-   INICIALIZACIÓN
+   INICIAR
    ========================================== */
 
 initDates();
