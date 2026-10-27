@@ -1337,7 +1337,7 @@ async function download(groups, name) {
 
 /* ==========================================
    BOTONES DE DESCARGA
-   ========================================== *
+   ========================================== */
 
 $('reports').onclick = e => {
     const b = e.target.closest(
