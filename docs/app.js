@@ -29,6 +29,8 @@ let raw = state.raw || null;
 let goals = structuredClone(C.defaults);
 let overrides = {};
 let lastGroups = [];
+let plantillaActiva = null;
+let plantillaNombre = "Sin cargar";
 
 delete state.raw;
 
@@ -375,6 +377,7 @@ function tiendasSinIngresos(stores, day) {
    REPORTE Y CALENDARIO
    ========================================== */
 
+
 function report(label, stores, dates, index) {
     const sum = total(stores, dates);
 
@@ -479,23 +482,10 @@ function report(label, stores, dates, index) {
                 m.percent !== null &&
                 m.percent >= 100;
 
-            const tiendas = tiendasConMeta(
-                stores,
-                day
+            const diagnostico = MetaDiagnostico.clasificar(
+                stores, day, state.data, goals, overrides,
+                plantillaActiva, C.metric
             );
-
-            const sinIngresos = tiendasSinIngresos(
-                stores,
-                day
-            );
-
-            const estadoTiendas =
-                tiendas.total > 0 &&
-                tiendas.lograron === tiendas.total
-                    ? 'completo'
-                    : tiendas.lograron > 0
-                        ? 'parcial'
-                        : 'sin-meta';
 
             const clasePorcentaje = chain
                 ? percentClass(stores, m.percent)
@@ -551,19 +541,15 @@ function report(label, stores, dates, index) {
                         ></i>
                     </div>
 
-                    <div class="tiendas-meta ${estadoTiendas}">
-                        <span class="tiendas-meta-texto">
-                            Alcanzadas ${tiendas.lograron}/${tiendas.total} tiendas
-                        </span>
-
-                        <span class="tiendas-sin-ingresos">
-                            ${
-                                sinIngresos === null
-                                    ? 'Sin ingresos: recarga Records'
-                                    : sinIngresos + ' tiendas sin ingresos'
-                            }
-                        </span>
+                    ${diagnostico ? `
+                    <div class="diagnostico-tiendas">
+                        <div class="diag-item sin-cobertura"><span>Sin cobertura</span><b>${diagnostico.sinCobertura}</b></div>
+                        <div class="diag-item sin-ingresos"><span>Cubiertas sin ingresos</span><b>${diagnostico.cubiertasSinIngresos}</b></div>
+                        <div class="diag-item bajo-meta"><span>Ingresos bajo meta</span><b>${diagnostico.bajoMeta}</b></div>
+                        <div class="diag-item alcanzada"><span>Meta alcanzada</span><b>${diagnostico.alcanzada}</b></div>
                     </div>
+                    ${diagnostico.alertas ? `<small class="diag-alerta">${diagnostico.alertas} con ingresos sin personal activo identificado</small>` : ''}
+                    ` : '<div class="diag-pendiente">Carga la plantilla para ver el diagnóstico</div>'}
                 </td>
             `;
         }
@@ -866,7 +852,9 @@ async function read(file, kind) {
             }
         );
 
-        const required = kind === 'base'
+        const required = kind === 'plantilla'
+            ? ['SOCIO', 'DETERMINANTE', 'ESTATUS']
+            : kind === 'base'
             ? [
                 'SOCIO',
                 'NUMERO DE TIENDA/DETERMINANTE',
@@ -1028,6 +1016,24 @@ for (const kind of ['base', 'detail']) {
         }
     );
 }
+
+/* Carga de plantilla ACTIVA (independiente de asistencia diaria). */
+$('plantillaFile').addEventListener('change', async e => {
+    const file=e.target.files[0];
+    if(!file)return;
+    try {
+        $('message').textContent='Leyendo plantilla '+file.name+'…';
+        const rows=await read(file,'plantilla');
+        const next=MetaDiagnostico.plantilla(rows);
+        plantillaActiva=next;
+        plantillaNombre=file.name;
+        $('plantillaName').textContent=file.name;
+        render();
+        $('message').textContent='Plantilla cargada: '+Object.values(next).reduce((a,b)=>a+b,0)+' promotores/sublíderes ACTIVO. La cobertura se calcula por personal asignado, no por A/R.';
+    } catch(err) {
+        $('message').textContent='No se cargó la plantilla: '+err.message;
+    } finally { e.target.value=''; }
+});
 
 /* ==========================================
    FILTROS
@@ -1380,3 +1386,4 @@ $('downloadAll').onclick = () => {
 initDates();
 filters();
 render();
+
