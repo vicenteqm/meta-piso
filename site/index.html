@@ -1,14 +1,465 @@
-<!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#100c18"><title>META PISO · Calendario de aprobadas</title><link rel="stylesheet" href="style.css?v=2"><link rel="stylesheet" href="brands.css?v=4"><script defer src="vendor/xlsx.full.min.js"></script><script defer src="vendor/html2canvas.min.js"></script><script defer src="core.js"></script><script defer src="seed.js"></script><script defer src="weeks.js"></script><script defer src="brands.js"></script><script defer src="app.js?v=4"></script></head>
-<body><header><a class="brand" href="#"><span class="brand-icon">M</span> META PISO <span class="edition">OCT / HALLOWEEN</span></a><button id="settingsButton">⚙ Editar metas</button></header>
-<main><section class="hero"><div><span class="eyebrow">INVEX · PRODUCTIVIDAD POR TIENDA</span><h1>Cada día cuenta.<br><em>La meta está en piso.</em></h1><p>Tu calendario de aprobadas, de lunes a domingo.</p><div class="chips"><span>WM <b id="wmRule">2 / 3</b></span><span>SAMS <b id="samsRule">4 / 5</b></span><span>Solo OPERANDO</span></div></div><div class="moon" aria-hidden="true"><span class="bat one">⌁</span><div class="pumpkin"><i></i><b>◢ ◣</b><strong>▾▾▾</strong></div><span class="bat two">⌁</span><span class="moon-label">TEMPORADA DE METAS</span></div></section>
-<section class="sources"><label class="upload"><span class="upload-icon">↥</span><span><b>Cargar detalle / Records</b><small id="detailName">Excel o CSV</small></span><input id="detailFile" type="file" accept=".xlsx,.xls,.csv"></label><label class="upload"><span class="upload-icon">⌂</span><span><b>Actualizar base de tiendas</b><small id="baseName">Excel o CSV</small></span><input id="baseFile" type="file" accept=".xlsx,.xls,.csv"></label></section>
-<p id="message" role="status" aria-live="polite"></p>
-<section class="filters"><label>Desde<input id="from" type="date"></label><label>Hasta<input id="to" type="date"></label><label>Cadena<select id="chain"><option value="">WM + SAMS</option><option>WM</option><option>SAMS</option></select></label><label>Región<select id="region"></select></label><label class="store-filter">Tienda<select id="store"></select></label><label>Semanas<select id="weekMode"><option value="all">Todas las semanas</option><option value="closed">Solo semanas cerradas</option></select></label><label>Semana específica<select id="week"></select></label><button id="resetFilters">Restablecer</button></section>
-<p id="weekSummary" class="hint" role="status"></p><section class="kpis" id="kpis"></section>
-<section class="toolbar"><div><span class="eyebrow">RESULTADOS</span><h2>Calendario de META PISO</h2></div><div class="toolbar-actions"><select id="view" aria-label="Desglose"><option value="general">Vista general</option><option value="chain">Por cadena</option><option value="region">Por región</option><option value="store">Por tienda</option></select><button class="primary" id="downloadAll">↓ Imagen general</button></div></section>
-<p class="hint">En cada día: meta, aprobadas, cumplimiento y aprobadas finalizadas. Las imágenes respetan los filtros y el periodo.</p><div id="reports"></div>
-<details class="audit"><summary>Fuentes y criterios de cálculo</summary><div id="audit"></div><p>Meta diaria por tienda: WM 2 entre semana y 3 sábado/domingo; SAMS 4 y 5, salvo edición. Cumplimiento = aprobadas ÷ meta. Finalizadas = Aprobada + Finalizado, por fecha de creación. Se excluyen garantía, CH, IKEA, folios no numéricos y duplicados idénticos. Las tiendas OPERANDO sin actividad cuentan en la meta. Las metas editadas aplican al periodo completo mostrado. Los datos cargados y metas se guardan en este navegador.</p><p>El rango inicial corresponde a las fechas del detalle. Dentro de ese rango, un día sin operaciones se considera cero; fuera del rango no se supone productividad. Cargar un detalle reemplaza al anterior.</p></details>
-<footer>META PISO <span>Solo aprobadas. Un objetivo diario.</span></footer></main>
-<dialog id="settings"><form id="goalsForm"><div class="dialog-heading"><h2>Metas de aprobadas</h2><button type="button" id="closeSettings" aria-label="Cerrar">✕</button></div><p>Entre semana: lunes a viernes. Fin de semana: sábado y domingo.</p><div class="goal-grid"><span>Cadena</span><span>Lun–Vie</span><span>Sáb–Dom</span><b>WM</b><input id="wmWeek" type="number" min="0" max="10000" step="1" required aria-label="Meta WM entre semana"><input id="wmEnd" type="number" min="0" max="10000" step="1" required aria-label="Meta WM fin de semana"><b>SAMS</b><input id="samsWeek" type="number" min="0" max="10000" step="1" required aria-label="Meta SAMS entre semana"><input id="samsEnd" type="number" min="0" max="10000" step="1" required aria-label="Meta SAMS fin de semana"></div><h3>Excepción por tienda</h3><label>Tienda<select id="overrideStore"></select></label><div class="override-fields"><label>Lun–Vie<input id="overrideWeek" type="number" min="0" max="10000" step="1" placeholder="Meta de cadena"></label><label>Sáb–Dom<input id="overrideEnd" type="number" min="0" max="10000" step="1" placeholder="Meta de cadena"></label></div><p class="hint">Deja ambos campos vacíos para usar la meta de cadena. Se guarda una excepción a la vez.</p><div class="dialog-actions"><button type="button" id="restoreGoals">Restaurar todas</button><button type="submit" class="primary">Guardar metas</button></div></form></dialog></body></html>
 
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <meta name="theme-color" content="#100c18">
+
+    <title>META PISO · Calendario de aprobadas</title>
+
+    <!-- ESTILOS -->
+    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="stylesheet" href="brands.css?v=10">
+
+    <!-- LIBRERÍAS -->
+    <script defer src="vendor/xlsx.full.min.js"></script>
+    <script defer src="vendor/html2canvas.min.js"></script>
+
+    <!-- SISTEMA META PISO -->
+    <script defer src="core.js?v=10"></script>
+    <script defer src="seed.js"></script>
+    <script defer src="weeks.js"></script>
+    <script defer src="brands.js"></script>
+    <script defer src="app.js?v=10"></script>
+</head>
+
+<body>
+
+    <!-- ENCABEZADO -->
+    <header>
+        <a class="brand" href="#">
+            <span class="brand-icon">M</span>
+            META PISO
+            <span class="edition">OCT / HALLOWEEN</span>
+        </a>
+
+        <button id="settingsButton">
+            ⚙ Editar metas
+        </button>
+    </header>
+
+    <main>
+
+        <!-- PRESENTACIÓN -->
+        <section class="hero">
+            <div>
+                <span class="eyebrow">
+                    INVEX · PRODUCTIVIDAD POR TIENDA
+                </span>
+
+                <h1>
+                    Cada día cuenta.
+                    <br>
+                    <em>La meta está en piso.</em>
+                </h1>
+
+                <p>
+                    Tu calendario de aprobadas, de lunes a domingo.
+                </p>
+
+                <div class="chips">
+                    <span>
+                        WM <b id="wmRule">2 / 3</b>
+                    </span>
+
+                    <span>
+                        SAMS <b id="samsRule">4 / 5</b>
+                    </span>
+
+                    <span>Solo OPERANDO</span>
+                </div>
+            </div>
+
+            <div class="moon" aria-hidden="true">
+                <span class="bat one">⌁</span>
+
+                <div class="pumpkin">
+                    <i></i>
+                    <b>◢ ◣</b>
+                    <strong>▾▾▾</strong>
+                </div>
+
+                <span class="bat two">⌁</span>
+                <span class="moon-label">
+                    TEMPORADA DE METAS
+                </span>
+            </div>
+        </section>
+
+        <!-- CARGA DE ARCHIVOS -->
+        <section class="sources">
+
+            <label class="upload">
+                <span class="upload-icon">↥</span>
+
+                <span>
+                    <b>Cargar detalle / Records</b>
+                    <small id="detailName">
+                        Excel o CSV
+                    </small>
+                </span>
+
+                <input
+                    id="detailFile"
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                >
+            </label>
+
+            <label class="upload">
+                <span class="upload-icon">⌂</span>
+
+                <span>
+                    <b>Actualizar base de tiendas</b>
+                    <small id="baseName">
+                        Excel o CSV
+                    </small>
+                </span>
+
+                <input
+                    id="baseFile"
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                >
+            </label>
+
+        </section>
+
+        <p
+            id="message"
+            role="status"
+            aria-live="polite"
+        ></p>
+
+        <!-- FILTROS -->
+        <section class="filters">
+
+            <label>
+                Desde
+                <input id="from" type="date">
+            </label>
+
+            <label>
+                Hasta
+                <input id="to" type="date">
+            </label>
+
+            <label>
+                Cadena
+                <select id="chain">
+                    <option value="">WM + SAMS</option>
+                    <option value="WM">WM</option>
+                    <option value="SAMS">SAMS</option>
+                </select>
+            </label>
+
+            <label>
+                Región
+                <select id="region"></select>
+            </label>
+
+            <label class="store-filter">
+                Tienda
+                <select id="store"></select>
+            </label>
+
+            <label>
+                Semanas
+                <select id="weekMode">
+                    <option value="all">
+                        Todas las semanas
+                    </option>
+
+                    <option value="closed">
+                        Solo semanas cerradas
+                    </option>
+                </select>
+            </label>
+
+            <label>
+                Semana específica
+                <select id="week"></select>
+            </label>
+
+            <button id="resetFilters">
+                Restablecer
+            </button>
+
+        </section>
+
+        <p
+            id="weekSummary"
+            class="hint"
+            role="status"
+        ></p>
+
+        <!-- INDICADORES GENERALES -->
+        <section class="kpis" id="kpis"></section>
+
+        <!-- RESULTADOS -->
+        <section class="toolbar">
+
+            <div>
+                <span class="eyebrow">
+                    RESULTADOS
+                </span>
+
+                <h2>
+                    Calendario de META PISO
+                </h2>
+            </div>
+
+            <div class="toolbar-actions">
+
+                <select
+                    id="view"
+                    aria-label="Desglose"
+                >
+                    <option value="general">
+                        Vista general
+                    </option>
+
+                    <option value="chain">
+                        Por cadena
+                    </option>
+
+                    <option value="region">
+                        Por región
+                    </option>
+
+                    <option value="store">
+                        Por tienda
+                    </option>
+                </select>
+
+                <button
+                    class="primary"
+                    id="downloadAll"
+                >
+                    ↓ Imagen general
+                </button>
+
+            </div>
+        </section>
+
+        <p class="hint">
+            En cada día: meta, aprobadas, cumplimiento,
+            aprobadas finalizadas, porcentaje de aprobación,
+            tiendas alcanzadas y tiendas sin ingresos.
+            Las imágenes respetan los filtros y el periodo.
+        </p>
+
+        <!-- CALENDARIOS GENERADOS POR APP.JS -->
+        <div id="reports"></div>
+
+        <!-- FUENTES Y CRITERIOS -->
+        <details class="audit">
+
+            <summary>
+                Fuentes y criterios de cálculo
+            </summary>
+
+            <div id="audit"></div>
+
+            <p>
+                Meta diaria por tienda: WM 2 entre semana
+                y 3 sábado/domingo; SAMS 4 y 5,
+                salvo edición.
+
+                Cumplimiento = aprobadas ÷ meta.
+
+                Porcentaje de aprobación =
+                trámites aprobados ÷ trámites ingresados.
+
+                Finalizadas = Aprobada + Finalizado,
+                por fecha de creación.
+
+                Se excluyen garantía, CH, IKEA,
+                folios no numéricos y duplicados idénticos.
+            </p>
+
+            <p>
+                Las tiendas OPERANDO sin actividad cuentan
+                en la meta.
+
+                Tiendas alcanzadas = tiendas que cumplen
+                o superan su meta individual del día.
+
+                Tiendas sin ingresos = tiendas OPERANDO
+                sin trámites registrados en el día.
+
+                Las metas editadas aplican al periodo
+                completo mostrado.
+            </p>
+
+            <p>
+                El rango inicial corresponde a las fechas
+                del detalle.
+
+                Dentro de ese rango, un día sin operaciones
+                se considera cero; fuera del rango no se
+                supone productividad.
+
+                Cargar un detalle reemplaza al anterior.
+
+                Los datos cargados y las metas se guardan
+                en este navegador.
+            </p>
+
+        </details>
+
+        <!-- PIE DE PÁGINA -->
+        <footer>
+            META PISO
+            <span>
+                Solo aprobadas. Un objetivo diario.
+            </span>
+        </footer>
+
+    </main>
+
+    <!-- CONFIGURACIÓN DE METAS -->
+    <dialog id="settings">
+
+        <form id="goalsForm">
+
+            <div class="dialog-heading">
+                <h2>Metas de aprobadas</h2>
+
+                <button
+                    type="button"
+                    id="closeSettings"
+                    aria-label="Cerrar"
+                >
+                    ✕
+                </button>
+            </div>
+
+            <p>
+                Entre semana: lunes a viernes.
+                Fin de semana: sábado y domingo.
+            </p>
+
+            <div class="goal-grid">
+
+                <span>Cadena</span>
+                <span>Lun–Vie</span>
+                <span>Sáb–Dom</span>
+
+                <b>WM</b>
+
+                <input
+                    id="wmWeek"
+                    type="number"
+                    min="0"
+                    max="10000"
+                    step="1"
+                    required
+                    aria-label="Meta WM entre semana"
+                >
+
+                <input
+                    id="wmEnd"
+                    type="number"
+                    min="0"
+                    max="10000"
+                    step="1"
+                    required
+                    aria-label="Meta WM fin de semana"
+                >
+
+                <b>SAMS</b>
+
+                <input
+                    id="samsWeek"
+                    type="number"
+                    min="0"
+                    max="10000"
+                    step="1"
+                    required
+                    aria-label="Meta SAMS entre semana"
+                >
+
+                <input
+                    id="samsEnd"
+                    type="number"
+                    min="0"
+                    max="10000"
+                    step="1"
+                    required
+                    aria-label="Meta SAMS fin de semana"
+                >
+
+            </div>
+
+            <h3>Excepción por tienda</h3>
+
+            <label>
+                Tienda
+                <select id="overrideStore"></select>
+            </label>
+
+            <div class="override-fields">
+
+                <label>
+                    Lun–Vie
+
+                    <input
+                        id="overrideWeek"
+                        type="number"
+                        min="0"
+                        max="10000"
+                        step="1"
+                        placeholder="Meta de cadena"
+                    >
+                </label>
+
+                <label>
+                    Sáb–Dom
+
+                    <input
+                        id="overrideEnd"
+                        type="number"
+                        min="0"
+                        max="10000"
+                        step="1"
+                        placeholder="Meta de cadena"
+                    >
+                </label>
+
+            </div>
+
+            <p class="hint">
+                Deja ambos campos vacíos para usar la meta
+                de cadena. Se guarda una excepción a la vez.
+            </p>
+
+            <div class="dialog-actions">
+
+                <button
+                    type="button"
+                    id="restoreGoals"
+                >
+                    Restaurar todas
+                </button>
+
+                <button
+                    type="submit"
+                    class="primary"
+                >
+                    Guardar metas
+                </button>
+
+            </div>
+
+        </form>
+
+    </dialog>
+
+</body>
+</html>
