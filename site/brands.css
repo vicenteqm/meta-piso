@@ -25,3 +25,126 @@
 .theme-WM .day-metrics td.percent-neutral,.theme-SAMS .day-metrics td.percent-neutral,.theme-WM .totals b.percent-neutral,.theme-SAMS .totals b.percent-neutral{color:#102c51}
 .kpi:nth-child(3) strong.percent-positive{color:#72e6a2}
 .kpi:nth-child(3) strong.percent-negative{color:#ff858b}
+
+
+/* ==========================================
+   META PISO - INDICADORES ADICIONALES
+   ========================================== */
+
+/* PORCENTAJE DE APROBACIÓN */
+
+.report .calendar .day-top .aprobacion-dia {
+    display: inline-block;
+    max-width: 75%;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.3;
+    text-align: right;
+    white-space: normal;
+    color: #1766b7 !important;
+}
+
+/* CONTENEDOR DE TIENDAS */
+
+.report .calendar .tiendas-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    min-height: 42px;
+    margin-top: 8px;
+    padding: 8px 6px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    background: #edf4fc;
+    border: 1px solid #b9d1ef;
+    text-align: center;
+    opacity: 1;
+    visibility: visible;
+}
+
+/* TEXTO PRINCIPAL */
+
+.report .calendar .tiendas-meta .tiendas-meta-texto {
+    display: block;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.35;
+    text-align: center;
+    color: #1766b7 !important;
+    opacity: 1;
+    visibility: visible;
+}
+
+/* TIENDAS SIN INGRESOS */
+
+.report .calendar .tiendas-meta .tiendas-sin-ingresos {
+    display: block;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: center;
+    color: #64748b !important;
+    opacity: 1;
+    visibility: visible;
+}
+
+/* TODAS LAS TIENDAS ALCANZARON META */
+
+.report .calendar .tiendas-meta.completo {
+    background: #e4f5e9;
+    border-color: #9bd5ad;
+}
+
+.report .calendar .tiendas-meta.completo .tiendas-meta-texto {
+    color: #137333 !important;
+}
+
+/* ALGUNAS TIENDAS ALCANZARON META */
+
+.report .calendar .tiendas-meta.parcial {
+    background: #edf4fc;
+    border-color: #b9d1ef;
+}
+
+.report .calendar .tiendas-meta.parcial .tiendas-meta-texto {
+    color: #1766b7 !important;
+}
+
+/* NINGUNA TIENDA ALCANZÓ META */
+
+.report .calendar .tiendas-meta.sin-meta {
+    background: #fff0f0;
+    border-color: #edc0c0;
+}
+
+.report .calendar .tiendas-meta.sin-meta .tiendas-meta-texto {
+    color: #bd1e28 !important;
+}
+
+/* DISEÑO RESPONSIVO */
+
+@media (max-width: 800px) {
+    .report .calendar .day-top .aprobacion-dia {
+        font-size: 9px;
+    }
+
+    .report .calendar .tiendas-meta {
+        gap: 3px;
+        padding: 7px 5px;
+        margin-top: 6px;
+    }
+
+    .report .calendar .tiendas-meta .tiendas-meta-texto {
+        font-size: 11px;
+    }
+
+    .report .calendar .tiendas-meta .tiendas-sin-ingresos {
+        font-size: 9px;
+    }
+}
