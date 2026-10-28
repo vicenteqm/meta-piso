@@ -52,6 +52,11 @@ try {
         'No se pudo recuperar la sesión anterior; se usa el corte inicial.';
 }
 
+// Recalcula también ingresos cuando la sesión procede de una versión anterior.
+if (raw && Array.isArray(raw.rows)) {
+    state.data = C.aggregate(raw, state.stores);
+}
+
 function save() {
     try {
         localStorage.setItem(
@@ -487,6 +492,8 @@ function report(label, stores, dates, index) {
                 plantillaActiva, C.metric
             );
 
+            const tiendas = tiendasConMeta(stores, day);
+
             const clasePorcentaje = chain
                 ? percentClass(stores, m.percent)
                 : good
@@ -550,6 +557,9 @@ function report(label, stores, dates, index) {
                     </div>
                     ${diagnostico.alertas ? `<small class="diag-alerta">${diagnostico.alertas} con ingresos sin personal activo identificado</small>` : ''}
                     ` : '<div class="diag-pendiente">Carga la plantilla para ver el diagnóstico</div>'}
+                    <div class="tiendas-meta" title="Tiendas cuyas aprobadas cumplen o superan su meta diaria positiva, entre las tiendas OPERANDO seleccionadas.">
+                        <span class="tiendas-meta-texto">Alcanzadas ${tiendas.lograron}/${tiendas.total} tiendas</span>
+                    </div>
                 </td>
             `;
         }

@@ -459,6 +459,7 @@
         let approved = 0;
         let finalized = 0;
         let ingresos = 0;
+        let ingresosDisponibles = true;
 
         const weekend = [0, 6].includes(
             new Date(
@@ -480,20 +481,24 @@
 
             approved += c?.approved || 0;
             finalized += c?.finalized || 0;
-            ingresos += c?.ingresos || 0;
+            if (c && !Number.isFinite(c.ingresos)) {
+                ingresosDisponibles = false;
+            } else {
+                ingresos += c?.ingresos || 0;
+            }
         }
 
         return {
             meta,
             approved,
             finalized,
-            ingresos,
+            ingresos: ingresosDisponibles ? ingresos : null,
 
             percent: meta
                 ? approved / meta * 100
                 : null,
 
-            approvalRate: ingresos
+            approvalRate: ingresosDisponibles && ingresos
                 ? approved / ingresos * 100
                 : null
         };
