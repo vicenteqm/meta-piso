@@ -41,15 +41,14 @@
     );
 
     const out = {};
+    // No enumerable: los conteos existentes y Object.values siguen siendo numéricos.
+    Object.defineProperty(out, 'employees', { value: {}, enumerable: false });
 
     for (const r of rows.slice(pos + 1)) {
       const status = norm(r[col('ESTATUS')]);
       const role = norm(r[puesto]);
 
-      if (
-        status !== 'ACTIVO' ||
-        !(/PROMOTOR|SUBLIDER|SUB LIDER/.test(role))
-      ) continue;
+      if (status !== 'ACTIVO') continue;
 
       let chain = norm(r[col('SOCIO')])
         .replace(/[^A-Z]/g, '');
@@ -63,7 +62,14 @@
       if (!det) continue;
 
       const key = chain + ':' + det;
-      out[key] = (out[key] || 0) + 1;
+      const coverage = /PROMOTOR|SUBLIDER|SUB LIDER/.test(role);
+      const fields = h.flatMap((label, i) => label && r[i] != null && r[i] !== ''
+        ? [{label, value: r[i] instanceof Date ? r[i].toISOString().slice(0,10) : String(r[i])}] : []);
+      const named = fields.find(f => /^(NOMBRE COMPLETO|NOMBRE DEL EMPLEADO|NOMBRE DEL COLABORADOR|COLABORADOR|EMPLEADO|NOMBRE)$/.test(f.label));
+      const parts = fields.filter(f => /^(NOMBRE\(S\)|NOMBRES|APELLIDO PATERNO|APELLIDO MATERNO)$/.test(f.label));
+      const employee = {name: named?.value || parts.map(f=>f.value).join(' ') || 'Nombre no disponible', role, coverage, fields};
+      (out.employees[key] ||= []).push(employee);
+      if (coverage) out[key] = (out[key] || 0) + 1;
     }
 
     return out;

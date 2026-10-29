@@ -25,53 +25,25 @@ const esc = s => String(s ?? '').replace(
 );
 
 let state = structuredClone(window.META_SEED);
-let raw = state.raw || null;
 let goals = structuredClone(C.defaults);
 let overrides = {};
 let lastGroups = [];
 let plantillaActiva = null;
-let plantillaNombre = "Sin cargar";
-
-delete state.raw;
-
-try {
-    const saved = JSON.parse(
-        localStorage.getItem('meta-piso-v1')
-    );
-
-    if (saved?.state?.data && saved?.state?.stores) {
-        state = saved.state;
-        raw = saved.raw || null;
-    }
-
-    if (saved?.goals) goals = saved.goals;
-    if (saved?.overrides) overrides = saved.overrides;
-
-} catch (e) {
-    $('message').textContent =
-        'No se pudo recuperar la sesión anterior; se usa el corte inicial.';
+let plantillaNombre = '';
+function attachRoster(){
+    plantillaActiva=state.roster?{...state.roster}:null;
+    if(plantillaActiva)Object.defineProperty(plantillaActiva,'employees',{value:state.employees||{},enumerable:false});
+    plantillaNombre=state.plantillaName||'Sin fuente incorporada';
 }
-
-// Recalcula también ingresos cuando la sesión procede de una versión anterior.
-if (raw && Array.isArray(raw.rows)) {
-    state.data = C.aggregate(raw, state.stores);
-}
-
-function save() {
-    try {
-        localStorage.setItem(
-            'meta-piso-v1',
-            JSON.stringify({
-                state,
-                raw,
-                goals,
-                overrides
-            })
-        );
-    } catch (e) {
-        $('message').textContent =
-            'La vista está actualizada, pero no se pudo guardar en este navegador.';
-    }
+attachRoster();
+try{
+    const saved=JSON.parse(localStorage.getItem('meta-piso-goals-v2'));
+    if(saved?.goals)goals=saved.goals;
+    if(saved?.overrides)overrides=saved.overrides;
+}catch(e){}
+function save(){
+    try{localStorage.setItem('meta-piso-goals-v2',JSON.stringify({goals,overrides}));}
+    catch(e){$('message').textContent='Las metas se aplicaron, pero no se pudieron guardar en este navegador.';}
 }
 
 function active() {
@@ -556,7 +528,7 @@ function report(label, stores, dates, index) {
                         <div class="diag-item alcanzada"><span>Meta alcanzada</span><b>${diagnostico.alcanzada}</b></div>
                     </div>
                     ${diagnostico.alertas ? `<small class="diag-alerta">${diagnostico.alertas} con ingresos sin personal activo identificado</small>` : ''}
-                    ` : '<div class="diag-pendiente">Carga la plantilla para ver el diagnóstico</div>'}
+                    ` : '<div class="diag-pendiente">Plantilla del mes no disponible</div>'}
                     <div class="tiendas-meta" title="Tiendas cuyas aprobadas cumplen o superan su meta diaria positiva, entre las tiendas OPERANDO seleccionadas.">
                         <span class="tiendas-meta-texto">Alcanzadas ${tiendas.lograron}/${tiendas.total} tiendas</span>
                     </div>
@@ -618,6 +590,7 @@ function report(label, stores, dates, index) {
    ========================================== */
 
 function render() {
+    MetaCobertura.render([], [], state.data, plantillaActiva, plantillaNombre);
     lastGroups = [];
 
     const from = $('from').value;
@@ -659,6 +632,8 @@ function render() {
 
     const sum = total(stores, dates);
 
+    MetaCobertura.render(stores, dates, state.data, plantillaActiva, plantillaNombre);
+
     $('downloadAll').disabled =
         !stores.length || !dates.length;
 
@@ -666,8 +641,7 @@ function render() {
         `${weeks.length} semanas · ${dates.length} días seleccionados. ` +
         'Cerradas = lunes a domingo completos dentro del rango y anteriores a hoy (México).';
 
-    $('detailName').textContent = state.detailName;
-    $('baseName').textContent = state.baseName;
+    MetaFuentes.render(state);
 
     $('wmRule').textContent =
         goals.WM.weekday + ' / ' + goals.WM.weekend;
@@ -779,7 +753,7 @@ function render() {
             Base: ${esc(state.baseName)}
         </p>
 
-        <p>
+        <p>${esc(state.auditNote||'')}</p><p>
             Filas de entrada: ${fmt(a.input)}
             · Folio/fecha inválidos: ${fmt(a.invalid)}
             · Duplicados idénticos: ${fmt(a.duplicates)}
@@ -805,248 +779,6 @@ function render() {
 
 /* ==========================================
    LEER EXCEL Y CSV
-   ========================================== */
-
-async function read(file, kind) {
-    let wb;
-
-    if (/\.csv$/i.test(file.name)) {
-        const bytes = await file.arrayBuffer();
-
-        let text = new TextDecoder('utf-8')
-            .decode(bytes);
-
-        if (text.includes('\ufffd')) {
-            text = new TextDecoder('windows-1252')
-                .decode(bytes);
-        }
-
-        wb = XLSX.read(text, {
-            type: 'string',
-            raw: true
-        });
-
-    } else {
-        wb = XLSX.read(
-            await file.arrayBuffer(),
-            {
-                type: 'array',
-                cellDates: true
-            }
-        );
-    }
-
-    let found = null;
-
-    for (const name of wb.SheetNames) {
-        const s = wb.Sheets[name];
-
-        if (!s['!ref']) continue;
-
-        const range = XLSX.utils.decode_range(
-            s['!ref']
-        );
-
-        const top = XLSX.utils.sheet_to_json(
-            s,
-            {
-                header: 1,
-                defval: '',
-                range: {
-                    s: { r: 0, c: 0 },
-                    e: {
-                        r: Math.min(range.e.r, 29),
-                        c: range.e.c
-                    }
-                }
-            }
-        );
-
-        const required = kind === 'plantilla'
-            ? ['SOCIO', 'DETERMINANTE', 'ESTATUS']
-            : kind === 'base'
-            ? [
-                'SOCIO',
-                'NUMERO DE TIENDA/DETERMINANTE',
-                'ESTATUS'
-            ]
-            : [
-                'FOLIO FICO',
-                'APROBACION',
-                'ESTATUS DEL PROCESO'
-            ];
-
-        if (!top.some(r =>
-            required.every(h =>
-                r.map(C.norm).includes(h)
-            )
-        )) {
-            continue;
-        }
-
-        let max = 0;
-
-        for (const key of Object.keys(s)) {
-            if (key[0] === '!') continue;
-
-            const cell = s[key];
-
-            if (
-                cell.v !== undefined &&
-                cell.v !== null &&
-                cell.v !== ''
-            ) {
-                max = Math.max(
-                    max,
-                    XLSX.utils.decode_cell(key).r
-                );
-            }
-        }
-
-        found = XLSX.utils.sheet_to_json(
-            s,
-            {
-                header: 1,
-                defval: '',
-                range: {
-                    s: { r: 0, c: 0 },
-                    e: {
-                        r: max,
-                        c: range.e.c
-                    }
-                }
-            }
-        );
-
-        break;
-    }
-
-    if (!found) {
-        throw Error(
-            'No se encontró una hoja compatible. Revisa los encabezados del archivo.'
-        );
-    }
-
-    return found;
-}
-
-/* ==========================================
-   CARGA DE ARCHIVOS
-   ========================================== */
-
-for (const kind of ['base', 'detail']) {
-    $(kind + 'File').addEventListener(
-        'change',
-        async e => {
-            const file = e.target.files[0];
-
-            if (!file) return;
-
-            $('message').textContent =
-                'Leyendo ' + file.name + '…';
-
-            $('baseFile').disabled = true;
-            $('detailFile').disabled = true;
-
-            try {
-                await new Promise(r =>
-                    setTimeout(r, 30)
-                );
-
-                const rows = await read(
-                    file,
-                    kind
-                );
-
-                if (kind === 'base') {
-                    const next = C.stores(rows);
-
-                    if (!raw) {
-                        throw Error(
-                            'Carga primero tu detalle de productividad para recalcular con una base nueva.'
-                        );
-                    }
-
-                    const data = C.aggregate(
-                        raw,
-                        next
-                    );
-
-                    state = {
-                        ...state,
-                        stores: next,
-                        data,
-                        baseName: file.name
-                    };
-
-                } else {
-                    const next = C.records(rows);
-
-                    const data = C.aggregate(
-                        next,
-                        state.stores
-                    );
-
-                    raw = next;
-
-                    state = {
-                        ...state,
-                        data,
-                        detailName: file.name
-                    };
-
-                    initDates();
-                }
-
-                filters();
-                render();
-
-                $('message').textContent =
-                    'Archivo cargado. ' +
-                    (
-                        state.data.audit.unmatched
-                            ? state.data.audit.unmatched +
-                              ' registros sin coincidencia; consulta los criterios al final.'
-                            : 'Datos actualizados.'
-                    );
-
-                save();
-
-            } catch (err) {
-                $('message').textContent =
-                    'No se reemplazaron los datos: ' +
-                    err.message;
-
-            } finally {
-                e.target.value = '';
-
-                $('baseFile').disabled = false;
-                $('detailFile').disabled = false;
-            }
-        }
-    );
-}
-
-/* Carga de plantilla ACTIVA (independiente de asistencia diaria). */
-$('plantillaFile').addEventListener('change', async e => {
-    const file=e.target.files[0];
-    if(!file)return;
-    try {
-        $('message').textContent='Leyendo plantilla '+file.name+'…';
-        const rows=await read(file,'plantilla');
-        const next=MetaDiagnostico.plantilla(rows);
-        plantillaActiva=next;
-        plantillaNombre=file.name;
-        $('plantillaName').textContent=file.name;
-        render();
-        $('message').textContent='Plantilla cargada: '+Object.values(next).reduce((a,b)=>a+b,0)+' promotores/sublíderes ACTIVO. La cobertura se calcula por personal asignado, no por A/R.';
-    } catch(err) {
-        $('message').textContent='No se cargó la plantilla: '+err.message;
-    } finally { e.target.value=''; }
-});
-
-/* ==========================================
-   FILTROS
    ========================================== */
 
 for (const name of [
@@ -1397,3 +1129,13 @@ initDates();
 filters();
 render();
 
+
+MetaFuentes.init(async month=>{
+    try{
+        $('message').textContent='Abriendo '+month+'…';
+        const next=await MetaFuentes.load(month);
+        state=structuredClone(next);attachRoster();
+        $('chain').value='';$('region').value='';$('store').value='';$('week').value='';
+        initDates();filters();render();$('message').textContent='Mes actualizado: '+month;
+    }catch(e){$('monthSource').value=state.month;$('message').textContent='No se cambió el mes: '+e.message;}
+});

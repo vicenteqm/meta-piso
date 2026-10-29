@@ -127,7 +127,9 @@
                 region: String(
                     get('REGION') || 'SIN REGIÓN'
                 ),
-                status: norm(get('ESTATUS'))
+                status: norm(get('ESTATUS')),
+                fields: t.headers.flatMap((label, i) => label && r[i] != null && r[i] !== ''
+                    ? [{label, value: r[i] instanceof Date ? r[i].toISOString().slice(0,10) : String(r[i])}] : [])
             });
         }
 

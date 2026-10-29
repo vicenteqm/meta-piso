@@ -17,16 +17,18 @@
     <link rel="stylesheet" href="brands.css?v=28">
 
     <!-- LIBRERÍAS -->
-    <script defer src="vendor/xlsx.full.min.js"></script>
+
     <script defer src="vendor/html2canvas.min.js"></script>
 
     <!-- SISTEMA META PISO -->
-    <script defer src="core.js?v=29"></script>
-    <script defer src="seed.js"></script>
+    <link rel="stylesheet" href="cobertura-detalle.css?v=31">
+    <script defer src="core.js?v=31"></script>
+    <script defer src="data/catalog.js?v=2026-10-29T2055114590660000"></script><script defer src="seed.js?v=2026-10-29T2055114590660000"></script><script defer src="fuentes.js?v=31"></script>
     <script defer src="weeks.js"></script>
     <script defer src="brands.js"></script>
-    <script defer src="diagnostico.js?v=28"></script>
-    <script defer src="app.js?v=29"></script>
+    <script defer src="diagnostico.js?v=31"></script>
+    <script defer src="cobertura-detalle.js?v=31"></script>
+    <script defer src="app.js?v=31"></script>
 </head>
 
 <body>
@@ -92,61 +94,9 @@
             </div>
         </section>
 
-        <!-- CARGA DE ARCHIVOS -->
-        <section class="sources">
-
-            <label class="upload">
-                <span class="upload-icon">↥</span>
-
-                <span>
-                    <b>Cargar detalle / Records</b>
-                    <small id="detailName">
-                        Excel o CSV
-                    </small>
-                </span>
-
-                <input
-                    id="detailFile"
-                    type="file"
-                    accept=".xlsx,.xls,.csv"
-                >
-            </label>
-
-            <label class="upload">
-                <span class="upload-icon">⌂</span>
-
-                <span>
-                    <b>Actualizar base de tiendas</b>
-                    <small id="baseName">
-                        Excel o CSV
-                    </small>
-                </span>
-
-                <input
-                    id="baseFile"
-                    type="file"
-                    accept=".xlsx,.xls,.csv"
-                >
-            </label>
-
-            <!-- NUEVA CARGA DE PLANTILLA -->
-            <label class="upload">
-                <span class="upload-icon">♙</span>
-
-                <span>
-                    <b>Cargar plantilla activa</b>
-                    <small id="plantillaName">
-                        Excel de personal · ACTIVO
-                    </small>
-                </span>
-
-                <input
-                    id="plantillaFile"
-                    type="file"
-                    accept=".xlsx,.xls,.csv"
-                >
-            </label>
-
+        <section class="source-panel" aria-labelledby="sourceTitle">
+            <div class="source-heading"><h2 id="sourceTitle">Fuentes y últimas actualizaciones</h2><label>Mes del proyecto<select id="monthSource"></select></label></div>
+            <p id="sourceUpdated" class="hint"></p><div id="sourceCards" class="source-cards"></div>
         </section>
 
         <p
@@ -281,95 +231,23 @@
         <!-- CALENDARIOS GENERADOS POR APP.JS -->
         <div id="reports"></div>
 
-        <!-- FUENTES Y CRITERIOS -->
-        <details class="audit">
+        <section id="coverageDetail" class="coverage-detail" aria-labelledby="coverageTitle">
+            <h2 id="coverageTitle">Tiendas con cobertura sin ingresos</h2>
+            <p class="hint">Personal activo asignado según la plantilla del mes; no equivale a asistencia diaria. Se muestra una fila por tienda con al menos un día sin ingresos, dentro de los filtros del calendario.</p>
+            <div class="coverage-controls">
+                <label>Buscar tienda, región o empleado<input id="coverageSearch" type="search" placeholder="Nombre, determinante, región…"></label>
+                <label>Ver<select id="coverageMode"><option value="any">Sin ingresos en algún día seleccionado</option><option value="all">Sin ingresos en todo el periodo seleccionado</option></select></label>
+            </div>
+            <p id="coverageStatus" role="status"></p>
+            <div id="coverageTable" class="coverage-scroll"></div>
+        </section>
 
-            <summary>
-                Fuentes y criterios de cálculo
-            </summary>
-
-            <div id="audit"></div>
-
-            <p>
-                Meta diaria por tienda: WM 2 entre semana
-                y 3 sábado/domingo; SAMS 4 y 5,
-                salvo edición.
-
-                Cumplimiento = aprobadas ÷ meta.
-
-                Porcentaje de aprobación =
-                trámites aprobados ÷ trámites ingresados.
-
-                Finalizadas = Aprobada + Finalizado,
-                por fecha de creación.
-
-                Se excluyen garantía, CH, IKEA,
-                folios no numéricos y duplicados idénticos.
-            </p>
-
-            <p>
-                Las tiendas OPERANDO sin actividad cuentan
-                en la meta.
-
-                La cobertura se determina mediante la
-                plantilla de personal cargada, considerando
-                únicamente registros con ESTATUS ACTIVO
-                y puestos de promotor o sublíder.
-
-                No se utilizan las claves de asistencia
-                A o R para determinar cobertura.
-            </p>
-
-            <p>
-                Sin cobertura: tienda sin personal activo
-                identificado y sin ingresos.
-
-                Cubiertas sin ingresos: tienda con personal
-                activo identificado, pero sin trámites
-                ingresados en el día.
-
-                Ingresos bajo meta: tienda con ingresos
-                registrados que no alcanzó su meta diaria
-                de aprobadas.
-
-                Meta alcanzada: tienda cuyas aprobadas
-                cumplen o superan su meta individual.
-            </p>
-
-            <p>
-                Cada tienda pertenece a una sola categoría.
-
-                Cuando una tienda tiene ingresos pero no
-                aparece personal activo asignado, se
-                clasifica por productividad y se genera
-                una alerta independiente.
-
-                La plantilla refleja el personal activo
-                del archivo cargado; no reconstruye
-                automáticamente la cobertura histórica
-                de cada fecha.
-            </p>
-
-            <p>
-                El rango inicial corresponde a las fechas
-                del detalle.
-
-                Dentro de ese rango, un día sin operaciones
-                se considera cero; fuera del rango no se
-                supone productividad.
-
-                Cargar un detalle reemplaza al anterior.
-
-                Los datos de Records, la base de tiendas
-                y las metas se guardan en este navegador.
-
-                La plantilla activa debe volver a cargarse
-                al recargar la página.
-            </p>
-
+        <details class="audit"><summary>Fuentes y criterios de cálculo</summary><div id="audit"></div>
+        <p>Solo tiendas OPERANDO de WM y SAMS. Meta WM: 2 lunes a viernes y 3 sábado/domingo; SAMS: 4 y 5, salvo edición. Cumplimiento = aprobadas / meta. Aprobación = aprobadas / ingresos. Se cuenta solo Aprobada; AF exige además Finalizado. Las fechas corresponden a la creación de las solicitudes.</p>
+        <p>La cobertura utiliza promotores y sublíderes ACTIVO de la plantilla del mes, no asistencia diaria. La tabla inferior muestra las tiendas cubiertas con cero ingresos en los días seleccionados. Los datos faltantes no se consideran cero.</p>
+        <p>Las fuentes se mantienen por mes en el proyecto. Una actualización de productividad reemplaza los días incluidos en el nuevo archivo para evitar sumar cortes duplicados. Las metas editadas aplican a todo el periodo mostrado y se guardan en este navegador; los datos proceden siempre de la versión publicada.</p>
         </details>
 
-        <!-- PIE DE PÁGINA -->
         <footer>
             META PISO
             <span>

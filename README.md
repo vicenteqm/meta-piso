@@ -1,39 +1,75 @@
 # META PISO
 
-Calendario de productividad INVEX con tema Halloween. Aplicación estática para GitHub Pages; también abre `site/index.html` sin servidor.
+Tablero: https://vicenteqm.github.io/meta-piso/
 
-## Uso
+La versión publicada vive en **docs/**. No copies `site/` encima de `docs/`: conserva una versión anterior y no incluye las funciones nuevas.
 
-1. El sitio inicia con el detalle del 1 al 25 de octubre de 2026 y la base del 23 de octubre.
-2. **Cargar detalle / Records** acepta XLSX, XLS o CSV. Identifica la hoja por encabezados; no suma las hojas de resumen. Cada carga reemplaza al detalle anterior.
-3. **Actualizar base de tiendas** acepta otra base con SOCIO, NUMERO DE TIENDA/DETERMINANTE, TIENDA, REGION y ESTATUS. Recalcula el detalle vigente con la nueva base.
-4. Filtra fechas, cadena, región y tienda. Cambia la vista a general, cadena, región o tienda.
-5. **Editar metas** cambia la meta por cadena o añade una excepción por tienda. Un cero es válido; ambos campos vacíos eliminan la excepción. Las ediciones aplican a todo el periodo mostrado.
-6. **Imagen general** exporta el total de la selección. **Imagen** en cada tabla exporta ese calendario individual. Los PNG respetan fechas y filtros.
-7. **Solo semanas cerradas** muestra únicamente semanas completas de lunes a domingo dentro del rango elegido, anteriores al día actual en Ciudad de México. **Semana específica** permite ver una sola semana. El resumen y las imágenes usan exactamente esos días.
-8. Los filtros de cadena, región y tienda están vinculados. Elegir una tienda selecciona su cadena y región; cambiar la cadena o región elimina una tienda incompatible.
-9. Las tablas e imágenes de una sola cadena incorporan su logo: SAMS en azul; Walmart en azul y amarillo. Las selecciones mixtas conservan la identidad de META PISO. Los logos se obtuvieron de los sitios oficiales [Walmart México](https://www.walmart.com.mx/) y [Sam’s Club México](https://www.sams.com.mx/) y se incluyen localmente para exportación sin CORS.
+## Actualizar
 
-## Reglas
+Haz doble clic en **ACTUALIZAR_META_PISO.bat**. Toma el mes actual, conserva las fuentes en el proyecto, valida, genera los datos públicos y publica en GitHub Pages. Un error de lectura/validación impide publicar. Si GitHub tiene cambios nuevos, se detiene para integrarlos antes.
 
-- Sólo tiendas WM y SAMS con estatus OPERANDO de la base vigente. CH se omite.
-- WM: 2 lunes a viernes; 3 sábado y domingo. SAMS: 4 y 5.
-- Sólo `Aprobada`; `Aprobada con Garantía` no cuenta.
-- AF: `Aprobada` con proceso `Finalizado`, agrupada por fecha de creación.
-- Cumplimiento: suma de aprobadas / suma de metas. Meta cero se muestra con porcentaje no aplicable.
-- Tiendas sin operaciones aportan su meta. Un día sin operaciones dentro del rango cargado cuenta como cero; fuera del rango se muestra Sin datos.
-- Excluye IKEA, folios no numéricos y filas idénticas. Solicitudes distintas con un mismo folio se conservan como en el detalle existente.
-- Un registro sin coincidencia inequívoca con la base no se atribuye a una tienda. Se informa en Fuentes y criterios.
-- La base vigente se aplica a todo el periodo; no se reconstruyen fechas históricas de apertura o cierre.
+Orígenes bajo `Documents/Vicente`:
 
-## Datos y almacenamiento
+- Base: `Base de tiendas`. Prefiere archivos sin PREVIO y el corte más reciente indicado por el nombre.
+- Productividad: `REPORTE DE PRODUCTIVIDAD`. Usa detalles del mes con fechas en el nombre, sin las copias SIN FORMULAS.
+- Plantilla: `Asistencias/Invex/AAAA/ASISTENCIA_INVEX_MES.xlsx`. Selecciona el mes solicitado; si hay varias entregas del mismo mes, usa la modificada más recientemente.
 
-Los archivos se procesan en el navegador. Las cargas y metas se conservan localmente; no se publican automáticamente ni se sincronizan entre equipos. GitHub Pages no puede leer una carpeta de Windows: para actualizar la base, selecciona el archivo desde el botón de carga.
+Para otro mes, desde una consola en el proyecto:
 
-La semilla pública sólo contiene catálogo operativo y conteos por tienda, día y resultado. No incluye folios, clientes, ejecutivos, sueldos, correos ni direcciones. Los Excel originales y material de preparación permanecen fuera del repositorio. El sitio no usa servicios externos para procesar archivos.
+```bat
+ACTUALIZAR_META_PISO.bat --mes 2026-11
+```
 
-## Verificación
+Cada mes requiere base, productividad y plantilla compatibles. El más reciente se abre inicialmente; los anteriores se consultan con el selector. El personal sale de la hoja con SOCIO, DETERMINANTE, ESTATUS y PERFIL DE PUESTO. No se suman las hojas PRODUCTIVIDAD de asistencia.
 
-`node tests/core.cjs` prueba metas, fechas, sábados/domingos, garantía, AF, duplicados, tiendas inactivas, CH, desconocidos y meta cero. `tests/browser.py` comprueba en Edge carga de los dos Excel reales, filtros, persistencia, vistas, PNG y adaptación móvil. Requiere Playwright disponible y rutas locales configuradas para las fuentes.
+Para importar fuentes específicas, usa el Python configurado del equipo:
 
-Las bibliotecas SheetJS y html2canvas se distribuyen localmente en `site/vendor`, conservando los avisos de licencia de sus distribuciones.
+```text
+python scripts/actualizar.py --mes 2026-10 --base "ruta/base.xlsx" --detalle "ruta/detalle.xlsx" --plantilla "ruta/plantilla.xlsx" --nombres-publicos
+python scripts/publicar_actualizacion.py
+```
+
+Después de la primera importación puedes indicar sólo la fuente que cambió. `--detalle` acepta varios archivos. Soporta XLSX, XLSM y CSV. Una entrega reemplaza los días que cubre, no se suma a cortes anteriores de esos días. Los huecos entre cortes detienen la actualización para no confundir días faltantes con cero. Reimportar el mismo archivo sin cambios conserva su fecha de incorporación.
+
+## Carpetas por mes
+
+```text
+fuentes/2026-10/
+  base/         # Originales e historial por hash
+  detalle/
+  plantilla/
+  seleccion.json
+docs/data/2026-10/
+  snapshot.js   # Datos públicos del mes
+  historial/
+docs/data/catalog.json
+```
+
+`fuentes/`, `.private/` y `.build/` están excluidas de Git. No se publican Excel, folios, usuarios, nóminas, PIN, teléfonos ni correos. Sólo tiendas, regiones, conteos, nombres y puestos activos autorizados y metadatos de archivos.
+
+El corte original del 1 al 25 de octubre se conserva como respaldo JSON de los datos extraídos del Excel en la primera preparación. Los detalles posteriores reemplazan sus días correspondientes. La fecha de modificación de ese respaldo es la del JSON, no la del Excel original que ya no está en su ruta anterior.
+
+## Últimas actualizaciones
+
+La parte superior muestra por fuente nombre, modificación e incorporación al proyecto, en horario de Ciudad de México. Productividad permite abrir la lista de archivos. También indica preparación de datos y corte cubierto.
+
+Las fuentes y empleados se toman siempre de la versión publicada. Las cargas antiguas del navegador no reemplazan datos nuevos. Sólo las metas editadas se conservan localmente.
+
+## Tabla de cobertura sin ingresos
+
+Seis columnas: Tienda, Región, Cobertura, Empleados activos, Días sin ingresos e Ingresos del periodo.
+
+- Cobertura: promotores/sublíderes ACTIVO asignados en la plantilla mensual. No representa asistencia diaria ni reconstruye altas/bajas históricas.
+- Empleados: nombres y puestos ACTIVO de la tienda, indicando quién aporta cobertura.
+- Días sin ingresos: fechas seleccionadas con cero ingresos. Cada tienda aparece una vez. Se puede limitar a cero durante todo el periodo.
+- Ingresos del periodo: todos los días seleccionados; puede ser positivo si sólo algunos días tuvieron cero.
+- Respeta cadena, región, tienda, fechas y semanas; permite búsqueda por tienda, determinante, región o empleado.
+- Un dato desconocido no se cuenta como cero. Los casos tienda/día coinciden con el diagnóstico del calendario.
+
+## Cálculos
+
+Sólo OPERANDO WM/SAMS. WM: 2 lunes a viernes y 3 sábado/domingo. SAMS: 4 y 5, salvo edición. Sólo Aprobada sin garantía. AF exige además Finalizado, por fecha de creación. Cumplimiento = aprobadas/meta; aprobación = aprobadas/ingresos. Los totales usan sumas, no promedios de porcentajes. Alcanzadas cuenta tiendas que cumplen o superan su meta positiva. Se excluyen CH, IKEA, folios inválidos y copias idénticas; solicitudes distintas con igual folio se conservan.
+
+Colores: WM verde >30%, rojo <30%; SAMS verde >60%, rojo <60%. Igualdad neutra; cumplir la meta sigue siendo 100%.
+
+Pruebas de fuentes y tabla: `tests/fuentes_browser.py` (Playwright y Edge). Bibliotecas y logos se incluyen localmente para exportar PNG.

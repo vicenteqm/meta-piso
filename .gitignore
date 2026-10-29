@@ -4,3 +4,8 @@ tests/*.png
 __pycache__/
 *.xlsx
 *.csv
+fuentes/
+.build/
+*.xls
+*.xlsm
+*.xlsb
