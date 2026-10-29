@@ -21,7 +21,7 @@ const data=C.aggregate(detail,base);
 for(const n of Object.values(data.counts))if(n.finalized>n.approved||n.approved>n.ingresos)throw Error('No concilian ingresos, aprobadas y AF.');
 // Campos públicos explícitos. Nunca se exportan las filas originales ni los datos de contacto.
 const stores=base.map(({id,key,chain,name,region,status})=>({id,key,chain,name,region,status}));
-const employees={};if(input.publishNames)for(const [key,items]of Object.entries(roster.employees))employees[key]=items.map(({name,role,coverage})=>({name,role,coverage}));
+const employees={};if(input.publishNames)for(const [key,items]of Object.entries(roster.employees))employees[key]=items.map(({name,role,coverage,attendance})=>({name,role,coverage,attendance:Object.fromEntries(Object.entries(attendance||{}).filter(([day])=>Number(day)<=new Date(Number(input.month.slice(0,4)),Number(input.month.slice(5,7)),0).getDate()).map(([day,code])=>[input.month+'-'+day.padStart(2,'0'),code]))}));
 const publicSource=s=>{const {path,...rest}=s;return rest;};
 const result={stores,data,roster:{...roster},employees,publishNames:input.publishNames,month:input.month,generatedAt:input.generatedAt,baseName:input.sources.base[0].name,detailName:sources.at(-1).name,plantillaName:input.sources.plantilla[0].name,sources:{base:input.sources.base.map(publicSource),detalle:sources.map(publicSource),plantilla:input.sources.plantilla.map(publicSource)},auditNote:'Filas de entrada y descartes describen archivos importados; los días solapados se reemplazan con la última entrega.'};
 fs.writeFileSync(process.argv[3],JSON.stringify(result));

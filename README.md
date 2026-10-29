@@ -57,7 +57,9 @@ Las fuentes y empleados se toman siempre de la versión publicada. Las cargas an
 
 ## Tabla de cobertura sin ingresos
 
-Seis columnas: Tienda, Región, Cobertura, Empleados activos, Días sin ingresos e Ingresos del periodo.
+Columnas: Tienda, Región, Cobertura, Empleados activos, Asistencia en días sin ingresos, Días sin ingresos e Ingresos del periodo.
+
+La asistencia muestra la clave literal A, F, D u otra registrada por fecha para cada promotor/sublíder ACTIVO. Se extrae de las columnas numéricas de días, no de Entr/Sal. Una celda vacía indica Sin registro; no se interpreta como falta. Se muestran sólo las fechas sin ingresos dentro de los filtros. Esta columna no modifica el criterio de cobertura ni los cálculos de productividad.
 
 - Cobertura: promotores/sublíderes ACTIVO asignados en la plantilla mensual. No representa asistencia diaria ni reconstruye altas/bajas históricas.
 - Empleados: nombres y puestos ACTIVO de la tienda, indicando quién aporta cobertura.

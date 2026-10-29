@@ -14,6 +14,6 @@ git('add','--','docs','scripts/actualizar.py','scripts/generar.cjs','scripts/act
 staged=git('diff','--cached','--name-only').splitlines()
 if any(f.startswith(('fuentes/','.private/','.build/')) or f.lower().endswith(('.xlsx','.xlsm','.xls','.csv','.xlsb')) for f in staged):raise RuntimeError('Se detectó una fuente privada en el índice')
 git('diff','--cached','--check')
-if staged:git('commit','-m','Incorporar fuentes mensuales y tabla de cobertura sin ingresos')
+if staged:git('commit','-m','Actualizar META PISO y sus fuentes mensuales')
 git('push','origin','main')
 print('Publicado: https://vicenteqm.github.io/meta-piso/\nCommit: '+git('rev-parse','HEAD'))

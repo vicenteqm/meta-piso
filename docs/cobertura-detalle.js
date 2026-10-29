@@ -19,8 +19,9 @@ function collect(stores,dates,data,roster){
  return {rows:rows.sort((a,b)=>b.zero.length-a.zero.length||a.store.region.localeCompare(b.store.region,'es',{numeric:true})||a.store.name.localeCompare(b.store.name,'es')),unknownDays};
 }
 function rowHtml(row){const {store:s,employees}=row;
+ const attendance=employees.filter(e=>e.coverage).map(e=>`<div class="attendance-person"><strong>${esc(e.name)}</strong><span>${esc(e.role)}</span><div class="attendance-days">${row.zero.map(day=>`<span class="attendance-day"><time>${esc(day)}</time><b>${esc(e.attendance?.[day]||'Sin registro')}</b></span>`).join('')}</div></div>`).join('')||'Sin personal identificado';
  const staff=employees.length?employees.map(e=>`<li><strong>${esc(e.name)}</strong><span>${esc(e.role)}${e.coverage?' · aporta cobertura':''}</span></li>`).join(''):'<li>Nombres no disponibles en la fuente de este mes.</li>';
- return `<tr><td><strong>${esc(s.chain)} ${esc(s.id)}</strong><br>${esc(s.name)}</td><td>${esc(s.region)}</td><td><b>${row.coverage}</b><small>promotores / sublíderes activos</small></td><td><ul class="coverage-staff">${staff}</ul></td><td><b>${row.zero.length} / ${current.dates.length}</b><small>${row.zero.map(esc).join('<br>')}</small></td><td>${row.total===null?'No disponible':row.total}</td></tr>`;
+ return `<tr><td><strong>${esc(s.chain)} ${esc(s.id)}</strong><br>${esc(s.name)}</td><td>${esc(s.region)}</td><td><b>${row.coverage}</b><small>promotores / sublíderes activos</small></td><td><ul class="coverage-staff">${staff}</ul></td><td class="attendance-cell">${attendance}</td><td><b>${row.zero.length} / ${current.dates.length}</b><small>${row.zero.map(esc).join('<br>')}</small></td><td>${row.total===null?'No disponible':row.total}</td></tr>`;
 }
 
 function draw(){
@@ -32,7 +33,7 @@ function draw(){
  const rows=result.rows.filter(r=>(!all||r.zero.length===dates.length)&&(!query||norm([r.store.name,r.store.id,r.store.chain,r.store.region,...r.employees.map(e=>e.name+' '+e.role)].join(' ')).includes(query)));
  $('coverageStatus').textContent=`${rows.length} tiendas · ${rows.reduce((a,r)=>a+r.zero.length,0)} casos tienda/día sin ingresos · Plantilla: ${name}.`+(result.unknownDays?` ${result.unknownDays} casos tienda/día sin datos de ingresos; no se cuentan como cero.`:'');
  if(!rows.length){$('coverageTable').innerHTML='<p class="empty">No hay tiendas con cobertura sin ingresos que coincidan con estos filtros.</p>';return;}
- $('coverageTable').innerHTML='<table><thead><tr><th>Tienda</th><th>Región</th><th>Cobertura</th><th>Empleados activos</th><th>Días sin ingresos</th><th>Ingresos del periodo</th></tr></thead><tbody>'+rows.map(rowHtml).join('')+'</tbody></table>';
+ $('coverageTable').innerHTML='<p class="hint">Asistencia: clave del archivo mensual para cada promotor/sublíder en los días sin ingresos. Una celda vacía se muestra como “Sin registro”, no como falta.</p><table><thead><tr><th>Tienda</th><th>Región</th><th>Cobertura</th><th>Empleados activos</th><th>Asistencia en días sin ingresos</th><th>Días sin ingresos</th><th>Ingresos del periodo</th></tr></thead><tbody>'+rows.map(rowHtml).join('')+'</tbody></table>';
 }
 function render(stores,dates,data,roster,name){current={stores,dates,data,roster,name};draw();}
 root.MetaCobertura={render,collect};

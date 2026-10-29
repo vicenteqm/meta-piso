@@ -9,13 +9,27 @@ with sync_playwright() as p:
     errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     page.goto((ROOT/'docs/index.html').as_uri())
     assert page.locator('input[type=file]').count()==0
-    assert page.locator('#coverageTable th').all_text_contents()==['Tienda','Región','Cobertura','Empleados activos','Días sin ingresos','Ingresos del periodo']
+    assert page.locator('#coverageTable th').all_text_contents()==['Tienda','Región','Cobertura','Empleados activos','Asistencia en días sin ingresos','Días sin ingresos','Ingresos del periodo']
     assert page.locator('#coverageTable details').count()==0
     assert page.locator('#coverageTable tbody tr').count()>0
     assert page.locator('#sourceCards article').count()==3
     assert '2026-10-28' in page.locator('#sourceUpdated').inner_text()
     assert page.locator('#monthSource').input_value()=='2026-10'
-    assert page.evaluate("!Object.keys(state).includes('raw')&&Object.values(state.employees).flat().every(e=>Object.keys(e).sort().join()==='coverage,name,role')")
+    assert page.evaluate("!Object.keys(state).includes('raw')&&Object.values(state.employees).flat().every(e=>Object.keys(e).sort().join()==='attendance,coverage,name,role')")
+    assert page.locator('.attendance-person').count()>0
+    assert page.evaluate("""() => {
+      const result=MetaDiagnostico.plantilla([['SOCIO','DETERMINANTE','ESTATUS','PERFIL DE PUESTO','NOMBRE COMPLETO',19,'Entr','Sal',20,21,22],['WM',1,'ACTIVO','PROMOTOR','PRUEBA','A','10:00','18:00','F','D','']]);
+      const a=result.employees['WM:1'][0].attendance;
+      return JSON.stringify(a)===JSON.stringify({'19':'A','20':'F','21':'D','22':''});
+    }""")
+    assert page.evaluate("""() => {
+      const rows=MetaCobertura.collect(selected(),lastGroups[0].dates,state.data,plantillaActiva).rows;
+      return [...document.querySelectorAll('#coverageTable tbody tr')].every((tr,i)=>{
+        const codes=[...tr.querySelectorAll('.attendance-day b')].map(e=>e.textContent);
+        const expected=rows[i].employees.filter(e=>e.coverage).flatMap(e=>rows[i].zero.map(d=>e.attendance?.[d]||'Sin registro'));
+        return JSON.stringify(codes)===JSON.stringify(expected);
+      });
+    }""")
     # Reconciliación independiente con los conteos por tienda/día y reglas de meta.
     assert page.evaluate("""() => {
       const stores=selected(),dates=lastGroups[0].dates;
@@ -47,4 +61,4 @@ with sync_playwright() as p:
     page.set_viewport_size({'width':390,'height':844});assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
     assert not errors,errors
     browser.close()
-print('OK: fuentes fijas, 6 columnas, nombres/puestos sin campos sensibles, filtros, corte al 28, conciliación con diagnóstico, exportación, mes y caché antigua.')
+print('OK: fuentes fijas, 7 columnas, claves de asistencia, filtros, corte al 28, conciliación con diagnóstico, exportación, mes y caché antigua.')

@@ -67,7 +67,13 @@
         ? [{label, value: r[i] instanceof Date ? r[i].toISOString().slice(0,10) : String(r[i])}] : []);
       const named = fields.find(f => /^(NOMBRE COMPLETO|NOMBRE DEL EMPLEADO|NOMBRE DEL COLABORADOR|COLABORADOR|EMPLEADO|NOMBRE)$/.test(f.label));
       const parts = fields.filter(f => /^(NOMBRE\(S\)|NOMBRES|APELLIDO PATERNO|APELLIDO MATERNO)$/.test(f.label));
-      const employee = {name: named?.value || parts.map(f=>f.value).join(' ') || 'Nombre no disponible', role, coverage, fields};
+      const attendance = {};
+      if (coverage) h.forEach((label, i) => {
+        if (/^(?:[1-9]|[12]\d|3[01])$/.test(label)) {
+          attendance[label] = r[i] == null ? '' : String(r[i]).trim();
+        }
+      });
+      const employee = {name: named?.value || parts.map(f=>f.value).join(' ') || 'Nombre no disponible', role, coverage, fields, attendance};
       (out.employees[key] ||= []).push(employee);
       if (coverage) out[key] = (out[key] || 0) + 1;
     }
