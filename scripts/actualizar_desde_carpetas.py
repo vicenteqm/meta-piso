@@ -5,7 +5,16 @@ from actualizar import run,ROOT
 VICENTE=Path.home()/'Documents/Vicente'
 MONTHS=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE']
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--mes',default=datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=-6))).strftime('%Y-%m'));args=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--mes',default=datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=-6))).strftime('%Y-%m'));p.add_argument('--seleccionar-mes',action='store_true');args=p.parse_args()
+    if args.seleccionar_mes:
+        catalog=ROOT/'docs/data/catalog.json'
+        saved=json.loads(catalog.read_text(encoding='utf-8')) if catalog.exists() else {}
+        default=saved.get('latest') or args.mes
+        print('Historial disponible: '+', '.join(saved.get('months',[])))
+        print('Actualizar un mes conserva los registros de los otros meses.')
+        args.mes=input('Mes a actualizar AAAA-MM (Enter = '+default+'): ').strip() or default
+    if not re.fullmatch(r'\d{4}-(0[1-9]|1[0-2])',args.mes):raise ValueError('Mes inválido: usa AAAA-MM, por ejemplo 2026-10')
+    print('Actualizando el mes '+args.mes)
     year,month=map(int,args.mes.split('-'))
     if month not in range(1,13):raise ValueError('Mes inválido')
     bases=[f for f in (VICENTE/'Base de tiendas').glob('*.xlsx') if not f.name.startswith('~$')]
