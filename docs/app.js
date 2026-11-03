@@ -100,7 +100,7 @@ function filters(changed = '') {
 
         if (!list.some(s =>
             (!$('region').value ||
-                s.region === $('region').value) &&
+                (s.region === $('region').value || Object.values(state.data.snapshots||{}).some(m=>m.stores.some(t=>t.key===s.key&&t.region===$('region').value)))) &&
             s.chain === $('chain').value
         )) {
             $('chain').value = '';
@@ -140,7 +140,7 @@ function filters(changed = '') {
         list.filter(s =>
             (!chain || s.chain === chain) &&
             (!$('region').value ||
-                s.region === $('region').value)
+                (s.region === $('region').value || Object.values(state.data.snapshots||{}).some(m=>m.stores.some(t=>t.key===s.key&&t.region===$('region').value))))
         ).sort((a, b) =>
             a.name.localeCompare(b.name, 'es')
         ).map(s => [
@@ -241,7 +241,7 @@ function selected() {
         (!$('chain').value ||
             s.chain === $('chain').value) &&
         (!$('region').value ||
-            s.region === $('region').value) &&
+            (s.region === $('region').value || Object.values(state.data.snapshots||{}).some(m=>m.stores.some(t=>t.key===s.key&&t.region===$('region').value)))) &&
         (!$('store').value ||
             s.key === $('store').value)
     );
@@ -269,7 +269,7 @@ function total(stores, dates) {
 
     for (const day of dates) {
         const m = C.metric(
-            stores,
+            dayStores(stores,day),
             state.data,
             day,
             goals,
@@ -292,7 +292,15 @@ function total(stores, dates) {
    TIENDAS ALCANZADAS
    ========================================== */
 
+function dayStores(stores,day){
+ const snapshot=state.data.snapshots?.[day.slice(0,7)];
+ if(!snapshot)return stores;
+ const keys=new Set(stores.map(s=>s.key));
+ return snapshot.stores.filter(s=>keys.has(s.key)&&s.status==='OPERANDO'&&['WM','SAMS'].includes(s.chain)&&(!$('region').value||s.region===$('region').value));
+}
+function dayAvailable(day){const s=state.data.snapshots?.[day.slice(0,7)];return state.data.snapshots?!!s&&day>=s.data.start&&day<=s.data.end:day>=state.data.start&&day<=state.data.end;}
 function tiendasConMeta(stores, day) {
+    stores=dayStores(stores,day);
     let lograron = 0;
 
     for (const store of stores) {
@@ -438,8 +446,7 @@ function report(label, stores, dates, index) {
                     </div>
 
                     ${
-                        day < state.data.start ||
-                        day > state.data.end
+                        !dayAvailable(day)
                             ? 'Sin datos'
                             : 'Fuera del filtro'
                     }
@@ -448,7 +455,7 @@ function report(label, stores, dates, index) {
 
         } else {
             const m = C.metric(
-                stores,
+                dayStores(stores,day),
                 state.data,
                 day,
                 goals,
@@ -460,8 +467,8 @@ function report(label, stores, dates, index) {
                 m.percent >= 100;
 
             const diagnostico = MetaDiagnostico.clasificar(
-                stores, day, state.data, goals, overrides,
-                plantillaActiva, C.metric
+                dayStores(stores,day), day, state.data, goals, overrides,
+                state.data.snapshots?.[day.slice(0,7)]?.roster || plantillaActiva, C.metric
             );
 
             const tiendas = tiendasConMeta(stores, day);
@@ -476,7 +483,7 @@ function report(label, stores, dates, index) {
                 <td>
                     <div class="day-top">
                         <b>
-                            ${Number(day.slice(-2))}
+                            ${Number(day.slice(-2))}<small> ${day.slice(0,7)}</small>
                         </b>
 
                         <span class="aprobacion-dia">
@@ -628,7 +635,7 @@ function render() {
     const stores = selected();
     const weeks = filteredWeeks(stores);
 
-    dates = weeks.flatMap(w => w.dates);
+    dates = weeks.flatMap(w => w.dates).filter(dayAvailable).filter(d=>$('weekday').value===''||String(new Date(d+'T12:00:00Z').getUTCDay())===$('weekday').value);
 
     const sum = total(stores, dates);
 
@@ -789,6 +796,7 @@ for (const name of [
     'store',
     'view',
     'weekMode',
+    'weekday',
     'week'
 ]) {
     $(name).addEventListener(
@@ -822,6 +830,7 @@ $('resetFilters').onclick = () => {
     $('region').value = '';
     $('store').value = '';
     $('weekMode').value = 'all';
+    $('weekday').value = '';
     $('week').value = '';
 
     initDates();
@@ -1136,6 +1145,6 @@ MetaFuentes.init(async month=>{
         const next=await MetaFuentes.load(month);
         state=structuredClone(next);attachRoster();
         $('chain').value='';$('region').value='';$('store').value='';$('week').value='';
-        initDates();filters();render();$('message').textContent='Mes actualizado: '+month;
+        initDates();filters();render();$('message').textContent=month==='all'?'Historial completo: selecciona Desde, Hasta y el día de la semana.':'Mes actualizado: '+month;
     }catch(e){$('monthSource').value=state.month;$('message').textContent='No se cambió el mes: '+e.message;}
 });

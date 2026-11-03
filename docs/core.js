@@ -457,6 +457,12 @@
         goals,
         overrides = {}
     ) {
+        if(data.snapshots){
+            const snapshot=data.snapshots[day.slice(0,7)];
+            if(!snapshot||day<snapshot.data.start||day>snapshot.data.end)return {meta:0,approved:0,finalized:0,ingresos:null,percent:null,approvalRate:null};
+            const keys=new Set(base.map(s=>s.key));
+            return metric(snapshot.stores.filter(s=>keys.has(s.key)&&s.status==='OPERANDO'&&['WM','SAMS'].includes(s.chain)),snapshot.data,day,goals,overrides);
+        }
         let meta = 0;
         let approved = 0;
         let finalized = 0;

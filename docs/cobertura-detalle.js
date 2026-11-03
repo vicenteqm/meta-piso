@@ -5,6 +5,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const norm=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
 let current={stores:[],dates:[],data:{counts:{}},roster:null,name:''};
 function collect(stores,dates,data,roster){
+ if(data.snapshots){const rows=[];let unknownDays=0;for(const snapshot of Object.values(data.snapshots)){const ds=dates.filter(d=>d.slice(0,7)===snapshot.month);if(!ds.length)continue;const keys=new Set(stores.map(s=>s.key));const rs={...snapshot.roster};Object.defineProperty(rs,'employees',{value:snapshot.employees||{}});const found=collect(snapshot.stores.filter(s=>keys.has(s.key)&&s.status==='OPERANDO'&&(!$('region').value||s.region===$('region').value)),ds,snapshot.data,rs);found.rows.forEach(r=>{r.month=snapshot.month;r.selectedDays=ds.length;});rows.push(...found.rows);unknownDays+=found.unknownDays;}return {rows,unknownDays};}
  const rows=[];let unknownDays=0;
  if(!roster)return {rows,unknownDays};
  for(const store of stores){
@@ -21,7 +22,7 @@ function collect(stores,dates,data,roster){
 function rowHtml(row){const {store:s,employees}=row;
  const attendance=employees.filter(e=>e.coverage).map(e=>`<div class="attendance-person"><strong>${esc(e.name)}</strong><span>${esc(e.role)}</span><div class="attendance-days">${row.zero.map(day=>`<span class="attendance-day"><time>${esc(day)}</time><b>${esc(e.attendance?.[day]||'Sin registro')}</b></span>`).join('')}</div></div>`).join('')||'Sin personal identificado';
  const staff=employees.length?employees.map(e=>`<li><strong>${esc(e.name)}</strong><span>${esc(e.role)}${e.coverage?' · aporta cobertura':''}</span></li>`).join(''):'<li>Nombres no disponibles en la fuente de este mes.</li>';
- return `<tr><td><strong>${esc(s.chain)} ${esc(s.id)}</strong><br>${esc(s.name)}</td><td>${esc(s.region)}</td><td><b>${row.coverage}</b><small>promotores / sublíderes activos</small></td><td><ul class="coverage-staff">${staff}</ul></td><td class="attendance-cell">${attendance}</td><td><b>${row.zero.length} / ${current.dates.length}</b><small>${row.zero.map(esc).join('<br>')}</small></td><td>${row.total===null?'No disponible':row.total}</td></tr>`;
+ return `<tr><td><strong>${esc(s.chain)} ${esc(s.id)}</strong><br>${esc(s.name)}${row.month?`<small>Mes: ${esc(row.month)}</small>`:""}</td><td>${esc(s.region)}</td><td><b>${row.coverage}</b><small>promotores / sublíderes activos</small></td><td><ul class="coverage-staff">${staff}</ul></td><td class="attendance-cell">${attendance}</td><td><b>${row.zero.length} / ${row.selectedDays||current.dates.length}</b><small>${row.zero.map(esc).join('<br>')}</small></td><td>${row.total===null?'No disponible':row.total}</td></tr>`;
 }
 
 function draw(){
@@ -30,8 +31,8 @@ function draw(){
  if(!dates.length){$('coverageStatus').textContent='Selecciona un periodo válido con días disponibles en el calendario.';return;}
  if(!roster){$('coverageStatus').textContent='No hay plantilla incorporada para este mes. Actualiza las fuentes del proyecto.';return;}
  const result=collect(stores,dates,data,roster),query=norm($('coverageSearch').value.trim()),all=$('coverageMode').value==='all';
- const rows=result.rows.filter(r=>(!all||r.zero.length===dates.length)&&(!query||norm([r.store.name,r.store.id,r.store.chain,r.store.region,...r.employees.map(e=>e.name+' '+e.role)].join(' ')).includes(query)));
- $('coverageStatus').textContent=`${rows.length} tiendas · ${rows.reduce((a,r)=>a+r.zero.length,0)} casos tienda/día sin ingresos · Plantilla: ${name}.`+(result.unknownDays?` ${result.unknownDays} casos tienda/día sin datos de ingresos; no se cuentan como cero.`:'');
+ const rows=result.rows.filter(r=>(!all||r.zero.length===(r.selectedDays||dates.length))&&(!query||norm([r.store.name,r.store.id,r.store.chain,r.store.region,...r.employees.map(e=>e.name+' '+e.role)].join(' ')).includes(query)));
+ $('coverageStatus').textContent=`${rows.length} tiendas · ${rows.reduce((a,r)=>a+r.zero.length,0)} casos tienda/día sin ingresos · Plantilla: ${data.snapshots?"según el mes indicado en cada fila":name}.`+(result.unknownDays?` ${result.unknownDays} casos tienda/día sin datos de ingresos; no se cuentan como cero.`:'');
  if(!rows.length){$('coverageTable').innerHTML='<p class="empty">No hay tiendas con cobertura sin ingresos que coincidan con estos filtros.</p>';return;}
  $('coverageTable').innerHTML='<p class="hint">Asistencia: clave del archivo mensual para cada promotor/sublíder en los días sin ingresos. Una celda vacía se muestra como “Sin registro”, no como falta.</p><table><thead><tr><th>Tienda</th><th>Región</th><th>Cobertura</th><th>Empleados activos</th><th>Asistencia en días sin ingresos</th><th>Días sin ingresos</th><th>Ingresos del periodo</th></tr></thead><tbody>'+rows.map(rowHtml).join('')+'</tbody></table>';
 }
