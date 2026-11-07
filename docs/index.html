@@ -22,13 +22,13 @@
 
     <!-- SISTEMA META PISO -->
     <link rel="stylesheet" href="cobertura-detalle.css?v=32">
-    <script defer src="core.js?v=33"></script>
+    <script defer src="core.js?v=34"></script>
     <script defer src="data/catalog.js?v=2026-11-07T1639078661360000"></script><script defer src="seed.js?v=2026-11-07T1639078661360000"></script><script defer src="fuentes.js?v=33"></script>
     <script defer src="weeks.js"></script>
     <script defer src="brands.js"></script>
     <script defer src="diagnostico.js?v=32"></script>
     <script defer src="cobertura-detalle.js?v=33"></script>
-    <script defer src="app.js?v=33"></script>
+    <script defer src="app.js?v=34"></script>
 
 </head>
 
@@ -247,7 +247,7 @@
         <details class="audit"><summary>Fuentes y criterios de cálculo</summary><div id="audit"></div>
         <p>Solo tiendas OPERANDO de WM y SAMS. Meta WM: 2 lunes a viernes y 3 sábado/domingo; SAMS: 4 y 5, salvo edición. Cumplimiento = aprobadas / meta. Aprobación = aprobadas / ingresos. Se cuenta solo Aprobada; AF exige además Finalizado. Las fechas corresponden a la creación de las solicitudes.</p>
         <p>La cobertura utiliza promotores y sublíderes ACTIVO de la plantilla del mes, no asistencia diaria. La tabla inferior muestra las tiendas cubiertas con cero ingresos en los días seleccionados. Los datos faltantes no se consideran cero.</p>
-        <p>Las fuentes se mantienen por mes en el proyecto. Una actualización de productividad reemplaza los días incluidos en el nuevo archivo para evitar sumar cortes duplicados. Las metas editadas aplican a todo el periodo mostrado y se guardan en este navegador; los datos proceden siempre de la versión publicada.</p>
+        <p>Las fuentes se mantienen por mes en el proyecto. Una actualización de productividad reemplaza los días incluidos en el nuevo archivo para evitar sumar cortes duplicados. Las metas usan su fecha de vigencia: hasta el 06/11/2026 WM 2/3 y SAMS 4/5; desde el 07/11/2026 WM 6/6 y SAMS 4/4. Los cambios adicionales se guardan por fecha en este navegador; los datos proceden siempre de la versión publicada.</p>
         </details>
 
         <footer>
@@ -281,6 +281,7 @@
                 Fin de semana: sábado y domingo.
             </p>
 
+            <label>Aplicar desde<input id="goalFrom" type="date" required min="2026-01-01"></label><p class="hint">El cambio aplica desde esta fecha hasta la siguiente vigencia. Se guarda en este navegador. Los días anteriores conservan sus metas.</p><div id="goalHistory"></div>
             <div class="goal-grid">
 
                 <span>Cadena</span>
@@ -372,7 +373,7 @@
 
             <p class="hint">
                 Deja ambos campos vacíos para usar la meta
-                de cadena. Se guarda una excepción a la vez.
+                de cadena. Se guarda una excepción por tienda desde la fecha indicada.
             </p>
 
             <div class="dialog-actions">
@@ -381,7 +382,7 @@
                     type="button"
                     id="restoreGoals"
                 >
-                    Restaurar todas
+                    Restaurar desde esta fecha
                 </button>
 
                 <button

@@ -476,8 +476,7 @@
         );
 
         for (const s of base) {
-            const rule =
-                overrides[s.key] || goals[s.chain];
+              const rule = ruleAt(goals, overrides, s, day);
 
             meta += rule[
                 weekend ? 'weekend' : 'weekday'
@@ -512,7 +511,20 @@
         };
     }
 
-    const api = {
+      const goalHistory = [
+          {from:'0001-01-01',WM:{weekday:2,weekend:3},SAMS:{weekday:4,weekend:5}},
+          {from:'2026-11-07',WM:{weekday:6,weekend:6},SAMS:{weekday:4,weekend:4}}
+      ];
+      function goalsAt(goals,day){
+          return (goals.history||[]).filter(r=>r.from<=day).sort((a,b)=>a.from.localeCompare(b.from)).at(-1)||goals;
+      }
+      function ruleAt(goals,overrides,store,day){
+          const entry=overrides[store.key];
+          const override=Array.isArray(entry)?entry.filter(r=>r.from<=day).sort((a,b)=>a.from.localeCompare(b.from)).at(-1)?.rule:entry;
+          return override||goalsAt(goals,day)[store.chain];
+      }
+      const api = {
+          goalHistory,goalsAt,ruleAt,
         norm,
         id,
         date,

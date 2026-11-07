@@ -25,7 +25,7 @@ const esc = s => String(s ?? '').replace(
 );
 
 let state = structuredClone(window.META_SEED);
-let goals = structuredClone(C.defaults);
+let goals = {...structuredClone(C.defaults),history:structuredClone(C.goalHistory)};
 let overrides = {};
 let lastGroups = [];
 let plantillaActiva = null;
@@ -37,12 +37,12 @@ function attachRoster(){
 }
 attachRoster();
 try{
-    const saved=JSON.parse(localStorage.getItem('meta-piso-goals-v2'));
+    const saved=JSON.parse(localStorage.getItem('meta-piso-goals-v3'));
     if(saved?.goals)goals=saved.goals;
     if(saved?.overrides)overrides=saved.overrides;
 }catch(e){}
 function save(){
-    try{localStorage.setItem('meta-piso-goals-v2',JSON.stringify({goals,overrides}));}
+    try{localStorage.setItem('meta-piso-goals-v3',JSON.stringify({goals,overrides}));}
     catch(e){$('message').textContent='Las metas se aplicaron, pero no se pudieron guardar en este navegador.';}
 }
 
@@ -583,7 +583,7 @@ function report(label, stores, dates, index) {
                 META PISO
                 · Aprob. = solo Aprobada
                 · AF = Aprobada + Finalizado
-                · Meta según configuración guardada
+                · Meta según vigencia de cada fecha
                 · CH excluido
             </p>
         `
@@ -651,10 +651,10 @@ function render() {
     MetaFuentes.render(state);
 
     $('wmRule').textContent =
-        goals.WM.weekday + ' / ' + goals.WM.weekend;
+        C.goalsAt(goals,MetaWeeks.today()).WM.weekday + ' / ' + C.goalsAt(goals,MetaWeeks.today()).WM.weekend;
 
     $('samsRule').textContent =
-        goals.SAMS.weekday + ' / ' + goals.SAMS.weekend;
+        C.goalsAt(goals,MetaWeeks.today()).SAMS.weekday + ' / ' + C.goalsAt(goals,MetaWeeks.today()).SAMS.weekend;
 
     $('kpis').innerHTML = [
         [
@@ -846,11 +846,12 @@ $('resetFilters').onclick = () => {
    ========================================== */
 
 function populateGoals() {
-    $('wmWeek').value = goals.WM.weekday;
-    $('wmEnd').value = goals.WM.weekend;
+    const currentGoals=C.goalsAt(goals,$("goalFrom").value||MetaWeeks.today());
+    $('wmWeek').value = currentGoals.WM.weekday;
+    $('wmEnd').value = currentGoals.WM.weekend;
 
-    $('samsWeek').value = goals.SAMS.weekday;
-    $('samsEnd').value = goals.SAMS.weekend;
+    $('samsWeek').value = currentGoals.SAMS.weekday;
+    $('samsEnd').value = currentGoals.SAMS.weekend;
 
     options(
         $('overrideStore'),
@@ -861,13 +862,13 @@ function populateGoals() {
         'Sin excepción'
     );
 
+    $('goalHistory').innerHTML='<h3>Historial de metas · Lun–Vie / Sáb–Dom</h3>'+goals.history.slice().sort((a,b)=>a.from.localeCompare(b.from)).map(r=>'<p>'+esc(r.from==='0001-01-01'?'Inicial':r.from)+' · WM '+r.WM.weekday+'/'+r.WM.weekend+' · SAMS '+r.SAMS.weekday+'/'+r.SAMS.weekend+'</p>').join('');
     loadOverride();
 }
 
 function loadOverride() {
-    const o = overrides[
-        $('overrideStore').value
-    ];
+    const entries=overrides[$('overrideStore').value]||[];
+    const o=entries.filter(r=>r.from<=$('goalFrom').value).sort((a,b)=>a.from.localeCompare(b.from)).at(-1)?.rule;
 
     $('overrideWeek').value =
         o?.weekday ?? '';
@@ -876,7 +877,9 @@ function loadOverride() {
         o?.weekend ?? '';
 }
 
+$('goalFrom').onchange=populateGoals;
 $('settingsButton').onclick = () => {
+    $('goalFrom').value=MetaWeeks.today();
     populateGoals();
     $('settings').showModal();
 };
@@ -909,7 +912,8 @@ $('goalsForm').onsubmit = e => {
 
     $('overrideWeek').setCustomValidity('');
 
-    goals = {
+    const change = {
+        from: $("goalFrom").value,
         WM: {
             weekday: Number($('wmWeek').value),
             weekend: Number($('wmEnd').value)
@@ -921,21 +925,19 @@ $('goalsForm').onsubmit = e => {
         }
     };
 
+    goals.history=goals.history.filter(r=>r.from!==change.from).concat(change);
     if (key) {
         if (w === '') {
-            delete overrides[key];
+            overrides[key]=(overrides[key]||[]).filter(r=>r.from!==change.from).concat({from:change.from,rule:null});
         } else {
-            overrides[key] = {
-                weekday: Number(w),
-                weekend: Number(d)
-            };
+            overrides[key]=(overrides[key]||[]).filter(r=>r.from!==change.from).concat({from:change.from,rule:{weekday:Number(w),weekend:Number(d)}});
         }
     }
 
     $('settings').close();
 
     $('message').textContent =
-        'Metas actualizadas para todo el periodo mostrado.';
+        'Metas guardadas desde '+change.from+'. Las fechas anteriores conservan sus metas.';
 
     render();
     save();
@@ -951,15 +953,13 @@ for (const el of [
 }
 
 $('restoreGoals').onclick = () => {
-    goals = structuredClone(C.defaults);
-    overrides = {};
-
-    populateGoals();
-    render();
-    save();
-
-    $('message').textContent =
-        'Se restauraron las metas WM 2/3 y SAMS 4/5.';
+    const day=$('goalFrom').value;
+    if(!day)return;
+    const official=C.goalsAt({history:C.goalHistory},day);
+    goals.history=goals.history.filter(r=>r.from!==day).concat({...structuredClone(official),from:day});
+    for(const key of Object.keys(overrides))overrides[key]=overrides[key].filter(r=>r.from!==day).concat({from:day,rule:null});
+    populateGoals();render();save();
+    $('message').textContent='Metas publicadas restauradas desde '+day+'. Se conservó el historial anterior.';
 };
 
 /* ==========================================
