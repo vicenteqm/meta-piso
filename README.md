@@ -10,7 +10,7 @@ Haz doble clic en **ACTUALIZAR_META_PISO.bat**. Toma el mes actual, conserva las
 
 Orígenes bajo `Documents/Vicente`:
 
-- Base: `Base de tiendas`. Prefiere archivos sin PREVIO y el corte más reciente indicado por el nombre.
+- Base fija: `C:\Users\plantilla.r3\Documents\Vicente\Base de tiendas\INVEX\BASE DE TIENDAS INVEX.xlsx`. Reemplaza este mismo archivo para actualizar la base. Si falta, el proceso se detiene indicando la ruta.
 - Productividad: `REPORTE DE PRODUCTIVIDAD`. Usa detalles del mes con fechas en el nombre, sin las copias SIN FORMULAS.
 - Plantilla: `Asistencias/Invex/AAAA/ASISTENCIA_INVEX_MES.xlsx`. Selecciona el mes solicitado; si hay varias entregas del mismo mes, usa la modificada más recientemente.
 

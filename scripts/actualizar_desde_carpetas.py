@@ -17,13 +17,8 @@ def main():
     print('Actualizando el mes '+args.mes)
     year,month=map(int,args.mes.split('-'))
     if month not in range(1,13):raise ValueError('Mes inválido')
-    bases=[f for f in (VICENTE/'Base de tiendas').glob('*.xlsx') if not f.name.startswith('~$')]
-    current=[f for f in bases if 'PREVIO' not in f.name.upper()];bases=current or bases
-    def basedate(f):
-        m=re.search(r'(\d{2})[-_](\d{2})[-_](\d{4})',f.name)
-        return (datetime.date(int(m[3]),int(m[2]),int(m[1])) if m else datetime.date.min,f.stat().st_mtime)
-    if not bases:raise ValueError('No se encontró base de tiendas')
-    base=max(bases,key=basedate)
+    base=VICENTE/'Base de tiendas/INVEX/BASE DE TIENDAS INVEX.xlsx'
+    if not base.is_file():raise ValueError('No se encontró la base de tiendas en la ruta fija: '+str(base))
     rosterfolder=VICENTE/'Asistencias/Invex'/str(year)
     roster=[f for f in rosterfolder.glob('*.xlsx') if not f.name.startswith('~$') and MONTHS[month-1] in f.stem.upper()]
     if not roster:raise ValueError('No se encontró plantilla mensual '+MONTHS[month-1]+' en '+str(rosterfolder))
