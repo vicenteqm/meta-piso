@@ -14,5 +14,9 @@ with sync_playwright() as p:
  page.click('#settingsButton');page.fill('#goalFrom','2026-12-01');page.locator('#goalFrom').dispatch_event('change');page.fill('#wmWeek','8');page.click('#goalsForm button[type=submit]')
  assert page.evaluate("C.goalsAt(goals,'2026-11-30').WM.weekday===6 && C.goalsAt(goals,'2026-12-01').WM.weekday===8 && C.goalsAt(goals,'2026-11-05').WM.weekday===2")
  page.reload();assert page.evaluate("C.goalsAt(goals,'2026-12-01').WM.weekday===8")
+ page.evaluate("localStorage.removeItem('meta-piso-repair-sams-20261107'); const saved=JSON.parse(localStorage.getItem('meta-piso-goals-v3')); saved.goals.history.find(r=>r.from==='2026-11-06').SAMS.weekend=0; localStorage.setItem('meta-piso-goals-v3',JSON.stringify(saved));")
+ page.reload()
+ assert page.locator('#samsRule').inner_text()=='4 / 4'
+ assert page.evaluate("C.goalsAt(goals,'2026-11-01').SAMS.weekend===5 && C.goalsAt(goals,'2026-12-01').WM.weekday===8")
  assert not errors,errors
  b.close();print('OK: vigencias originales, 6/nov, cambio futuro y persistencia sin alterar fechas anteriores.')

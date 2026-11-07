@@ -41,6 +41,18 @@ try{
     if(saved?.goals)goals=saved.goals;
     if(saved?.overrides)overrides=saved.overrides;
 }catch(e){}
+// Repair the reported saved 4/0 setting once; retain future intentional edits.
+try{
+    if(!localStorage.getItem('meta-piso-repair-sams-20261107')){
+        const affected=(goals.history||[]).filter(r=>['2026-11-06','2026-11-07'].includes(r.from)&&r.SAMS?.weekday===4&&r.SAMS?.weekend===0);
+        if(affected.length){
+            localStorage.setItem('meta-piso-before-sams-repair',JSON.stringify({goals,overrides}));
+            affected.forEach(r=>{r.SAMS.weekend=4;});
+            localStorage.setItem('meta-piso-goals-v3',JSON.stringify({goals,overrides}));
+        }
+        localStorage.setItem('meta-piso-repair-sams-20261107','1');
+    }
+}catch(e){}
 // Correct the previously published effective date while preserving other edits.
 if(goals.history){
     goals.history=goals.history.filter(r=>!(r.from==='2026-11-07'&&r.WM.weekday===6&&r.WM.weekend===6&&r.SAMS.weekday===4&&r.SAMS.weekend===4));
