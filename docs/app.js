@@ -41,6 +41,11 @@ try{
     if(saved?.goals)goals=saved.goals;
     if(saved?.overrides)overrides=saved.overrides;
 }catch(e){}
+// Correct the previously published effective date while preserving other edits.
+if(goals.history){
+    goals.history=goals.history.filter(r=>!(r.from==='2026-11-07'&&r.WM.weekday===6&&r.WM.weekend===6&&r.SAMS.weekday===4&&r.SAMS.weekend===4));
+    if(!goals.history.some(r=>r.from==='2026-11-06'))goals.history.push(structuredClone(C.goalHistory[1]));
+}
 function save(){
     try{localStorage.setItem('meta-piso-goals-v3',JSON.stringify({goals,overrides}));}
     catch(e){$('message').textContent='Las metas se aplicaron, pero no se pudieron guardar en este navegador.';}

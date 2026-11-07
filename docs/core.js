@@ -513,7 +513,7 @@
 
       const goalHistory = [
           {from:'0001-01-01',WM:{weekday:2,weekend:3},SAMS:{weekday:4,weekend:5}},
-          {from:'2026-11-07',WM:{weekday:6,weekend:6},SAMS:{weekday:4,weekend:4}}
+          {from:'2026-11-06',WM:{weekday:6,weekend:6},SAMS:{weekday:4,weekend:4}}
       ];
       function goalsAt(goals,day){
           return (goals.history||[]).filter(r=>r.from<=day).sort((a,b)=>a.from.localeCompare(b.from)).at(-1)||goals;
