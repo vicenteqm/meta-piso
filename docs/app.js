@@ -614,6 +614,7 @@ function report(label, stores, dates, index) {
    ========================================== */
 
 function render() {
+    MetaCompararTiendas.render([],[]);
     MetaCobertura.render([], [], state.data, plantillaActiva, plantillaNombre);
     lastGroups = [];
 
@@ -657,6 +658,7 @@ function render() {
     const sum = total(stores, dates);
 
     MetaCobertura.render(stores, dates, state.data, plantillaActiva, plantillaNombre);
+    MetaCompararTiendas.render(stores,dates);
 
     $('downloadAll').disabled =
         !stores.length || !dates.length;
