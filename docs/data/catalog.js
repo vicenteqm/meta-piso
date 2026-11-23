@@ -1,1 +1,1 @@
-window.META_CATALOG={"months": ["2026-11", "2026-10"], "latest": "2026-11", "updatedAt": "2026-11-17T19:24:54.503656+00:00"};
+window.META_CATALOG={"months": ["2026-11", "2026-10"], "latest": "2026-11", "updatedAt": "2026-11-23T18:08:10.004657+00:00"};
